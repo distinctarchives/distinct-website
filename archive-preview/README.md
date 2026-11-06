@@ -1,25 +1,20 @@
-# Distinct Archives — Minimal Index / V2
+# Distinct Archives — Archive preview V3
 
-A restrained archive prototype, independent from the live homepage.
+The only active preview is `/archive-preview/`. It replaces the earlier archive V1/V2 designs without affecting the domain homepage.
 
-## Preview
-`https://distinctarchives.com/archive-preview/`
+## Current direction
+- Warm-white background, black and grey typography
+- Less numbering, less text, more space
+- Four expandable records: Capo, New Age, Distinct: Uncensored, /404
+- Image placeholders for the first three records; original /404 image is real
+- Filtering: All, Commissioned, Independent
+- Simple mobile-friendly index with minimal interactions
 
-## Visual direction
-- Paper white (#fafaf8) and black/grey only
-- Small, systematic typography; wide editorial margins; hairline rules
-- Quiet alphabetical/numeric archival framing and whitespace
-- No oversized hero, gradients, color-block mockups, artificial project images, decorations or unnecessary motion
-- 4-item index: Capo, New Age, Distinct: Uncensored and original /404
-- Minimal functional filters (All, Commissioned, Independent), native expandable project records
-- Mobile responsive and keyboard accessible via native HTML details
+## Files
+- `archive-preview/index.html` is fully self-contained for the website layout and interaction; it embeds the existing /404 artwork for reliable display.
+- Favicon points to `../favicon.svg`.
 
-## Image accuracy
-The /404 project includes the **original supplied artwork**. The other three project imagery slots deliberately do **not** contain fabricated logos or mockups; they await actual project files.
+The previous V1 `app.js` and `style.css` files are **not loaded** by V3. Only the V3 HTML is active.
 
-## Deployment and editing
-The preview is fully self-contained in `archive-preview/index.html` (HTML + CSS + very small JS filter). No external third-party libraries. Favicon uses the original studio logo from `../favicon.svg`.
-
-`archive-preview/style.css` and `archive-preview/app.js` are **legacy V1 artifacts** and are **no longer loaded** by V2; they can be removed after design approval.
-
-The public site's `/index.html`, `/404.html`, `/CNAME` and website DNS records are unchanged. This prototype is in a separate route and has a noindex directive, but remains publicly accessible by URL. Do not include private client work in this preview.
+## Next steps
+Replace placeholder blocks with Distinct's approved original project imagery. Review copy and projects before replacing the public holding page. The archive is currently published only on the preview path with `noindex,nofollow`; the path is still accessible to anyone with the URL.
