@@ -1,25 +1,25 @@
-# Distinct Archives — Archive preview (v.01)
+# Distinct Archives — Minimal Index / V2
 
-This is a deliberately isolated, first-pass portfolio concept at `/archive-preview/`. It does not replace the site's existing `/404` homepage.
+A restrained archive prototype, independent from the live homepage.
 
-## Concept
-An evolving editorial index of commissions, independent work and research. Built with plain HTML, CSS and JavaScript, no frameworks or paid hosting.
+## Preview
+`https://distinctarchives.com/archive-preview/`
 
-## Included
-- Responsive editorial homepage and typographic hero
-- Numbered archive records: Capo, New Age, Uncensored, original /404 artwork, Visual Studies (future collection)
-- List/grid switch, discipline filters and live text search
-- In-page project record overlays with metadata and credits, hash URLs
-- Keyboard support: `/` focuses search, `Esc` closes detail
-- Respect for reduced-motion preferences; no tracking scripts
+## Visual direction
+- Paper white (#fafaf8) and black/grey only
+- Small, systematic typography; wide editorial margins; hairline rules
+- Quiet alphabetical/numeric archival framing and whitespace
+- No oversized hero, gradients, color-block mockups, artificial project images, decorations or unnecessary motion
+- 4-item index: Capo, New Age, Distinct: Uncensored and original /404
+- Minimal functional filters (All, Commissioned, Independent), native expandable project records
+- Mobile responsive and keyboard accessible via native HTML details
 
-## Editorial accuracy
-All Capo, New Age, Uncensored and Visual Studies cover art shown here is original *website-interface placeholder art*. It is **not** asserted to be approved client branding or real portfolio imagery. The /404 image is the original Distinct Archives graphic supplied for the holding page. Detailed project content must be reviewed and replaced with client-approved material before turning this into the public homepage. Current source copy is based on previously prepared Distinct Archives portfolio materials; the live Framer site was not retrievable for asset-by-asset migration.
+## Image accuracy
+The /404 project includes the **original supplied artwork**. The other three project imagery slots deliberately do **not** contain fabricated logos or mockups; they await actual project files.
 
-## Edit
-Project data and copy: `app.js`, `ITEMS` array. Visual covers: `visual(item)` in `app.js` plus `.visual-plate` selectors in `style.css`. Typography, color and layout: `style.css`.
+## Deployment and editing
+The preview is fully self-contained in `archive-preview/index.html` (HTML + CSS + very small JS filter). No external third-party libraries. Favicon uses the original studio logo from `../favicon.svg`.
 
-## Deployment
-Site files are at `archive-preview/index.html` in the public `distinctarchives/distinct-website` repository and should publish under the GitHub Pages site on its existing custom domain. `index.html` and `CNAME` at the repo root are unchanged; therefore the holding page remains the homepage. All prototype pages include `noindex,nofollow` (note: this does not make a public preview private).
+`archive-preview/style.css` and `archive-preview/app.js` are **legacy V1 artifacts** and are **no longer loaded** by V2; they can be removed after design approval.
 
-When the design is approved, the archive can be moved to the repository root as the homepage, with the holding-page artwork retained in a `404.html` record.
+The public site's `/index.html`, `/404.html`, `/CNAME` and website DNS records are unchanged. This prototype is in a separate route and has a noindex directive, but remains publicly accessible by URL. Do not include private client work in this preview.
