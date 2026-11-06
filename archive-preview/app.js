@@ -31,7 +31,8 @@ function itemsForView(){let list=ITEMS.filter(x=>(state.browse==='work'?x.group=
   return list;
 }
 function updateToolbar(){
-  $$('.filter').forEach(b=>{const active=b.dataset.filter===state.filter;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
+  const scope=ITEMS.filter(x=>state.browse==='work'?x.group==='work':state.browse==='fragments'?x.group==='fragments':true);
+  $('.filter').forEach(b=>{const active=b.dataset.filter===state.filter;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));const n=b.querySelector('span');if(n)n.textContent=String(scope.filter(x=>b.dataset.filter==='all'||x.kind===b.dataset.filter).length).padStart(2,'0');});
   $('#listToggle').classList.toggle('is-active',state.view==='list');$('#listToggle').setAttribute('aria-pressed',String(state.view==='list'));
   $('#gridToggle').classList.toggle('is-active',state.view==='grid');$('#gridToggle').setAttribute('aria-pressed',String(state.view==='grid'));
   $('#archiveItems').classList.toggle('grid-mode',state.view==='grid');$('#archiveItems').classList.toggle('list-mode',state.view==='list');
@@ -59,7 +60,9 @@ function route(){
   const hash=decodeURIComponent(location.hash.replace(/^#/,'')||'index');const parts=hash.split('/');
   if(parts[0]==='record'){const item=getById(parts[1]);if(item){openDetail(item);return;}}
   closeDetail(); const kind=['index','work','fragments','information'].includes(parts[0])?parts[0]:'index';
-  if(kind==='index'||kind==='work'||kind==='fragments')state.browse=kind;
+  if(kind==='index'||kind==='work'||kind==='fragments'){
+    if(kind!==state.browse){state.browse=kind;state.filter='all';state.query='';$('#searchInput').value='';}
+  }
   $$('.primary-nav a').forEach(a=>a.classList.toggle('is-active',a.dataset.route===kind));
   if(kind==='information'){$('#aside').scrollIntoView({behavior:'smooth',block:'start'});}else if(kind==='index'){window.scrollTo({top:0,behavior:'smooth'});}else{$('#archive').scrollIntoView({behavior:'smooth',block:'start'});}
   const nav=$('.primary-nav');nav.classList.remove('open');$('#navToggle').setAttribute('aria-expanded','false');
