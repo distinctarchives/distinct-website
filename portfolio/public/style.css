@@ -77,7 +77,7 @@
 }
 
 /* Test 07 — soft pink link accent */
-:root{--accent-pink:#e6a0bd}
+:root{--accent-pink:#f7a0c8}
 .home-copy .stack button:hover,
 .home-copy .stack button:focus-visible,
 .home-copy .group>.plain:hover,
