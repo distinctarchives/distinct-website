@@ -41,3 +41,37 @@
 /* Test 05 — oversized About / Contact editorial overprint */
 .home-overprint{left:27%;width:min(69%,1050px);top:24%;max-height:70%}
 @media(max-width:760px){.home-overprint{left:17px;top:30%;width:calc(100% - 34px);max-height:55%}}
+
+/* Test 06 — screen-wide editorial overprint */
+.home-overprint{
+  left:clamp(18px,2.1vw,37px);
+  right:clamp(18px,2.1vw,37px);
+  width:auto;
+  top:22%;
+  max-height:73%;
+  overflow-x:hidden;
+}
+.overprint-inner{
+  width:100%;
+  max-width:none;
+  font-size:clamp(40px,6.3vw,112px);
+  line-height:1.01;
+  letter-spacing:-.05em;
+}
+.overprint-inner a{
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+@media(max-width:760px){
+  .home-overprint{
+    left:17px;
+    right:17px;
+    width:auto;
+    top:29%;
+    max-height:60%;
+  }
+  .overprint-inner{
+    font-size:clamp(32px,8.6vw,57px);
+    line-height:1.05;
+  }
+}
