@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Distinct Archives — alternative homepage study.">
+<title>Distinct Archives — Home Study 10</title>
+<base href="/">
+<link rel="stylesheet" href="/style.css">
+<style>
+/* Home Study 10 — fixed Swiss navigation and a scrollable image stream.
+   Kept separate from the production homepage for review. */
+html,body{height:100%;overflow:hidden}
+#home.home-test10{position:fixed;inset:0;width:100%;height:100dvh;min-height:0;overflow:hidden;background:#fff}
+.home-test10 button{font-family:inherit}
+.home-test10 .study-head{
+ position:absolute;z-index:6;left:clamp(18px,2.1vw,38px);right:clamp(18px,2.1vw,38px);
+ top:clamp(18px,2.2vw,30px);display:flex;justify-content:space-between;align-items:flex-start;
+ font-size:clamp(11px,.88vw,13px);line-height:1.13;letter-spacing:-.015em
+}
+.home-test10 .study-brand{font-weight:700;letter-spacing:-.025em}
+.home-test10 .study-head nav{display:flex;gap:clamp(12px,1.5vw,27px);align-items:center}
+.home-test10 .study-head .plain{text-transform:uppercase;font-weight:400}
+.home-test10 .study-head button:hover,.home-test10 .study-head button:focus-visible{color:var(--accent-pink,#f7a0c8)}
+.home-test10 .home-copy{
+ position:absolute;z-index:5;left:clamp(18px,2.1vw,38px);top:46%;transform:translateY(-50%);
+ width:min(20vw,285px);max-width:none;line-height:1.12;letter-spacing:-.018em;
+ font-size:clamp(11px,.88vw,13px)
+}
+.home-test10 .home-copy .group{margin:0}
+.home-test10 .home-copy .work-label{color:#b3b3b3;text-transform:uppercase;margin-bottom:4px}
+.home-test10 #work-links{display:flex;flex-direction:column;align-items:flex-start;gap:0}
+.home-test10 #work-links button{
+ font-size:inherit;line-height:1.17;text-transform:uppercase;transition:color .16s ease;
+ max-width:100%;white-space:normal;text-align:left
+}
+.home-test10 #work-links button.is-selected{color:#151515;font-weight:700}
+.home-test10 #work-links button:not(.is-selected){color:#aaa}
+.home-test10 #work-links button:hover,.home-test10 #work-links button:focus-visible{color:var(--accent-pink,#f7a0c8)!important;text-decoration:none}
+.home-test10 .study-index{position:absolute;bottom:clamp(17px,2.8vw,40px);left:clamp(18px,2.1vw,38px);
+ z-index:3;color:#aaa;font-size:clamp(10px,.8vw,12px);line-height:1.14;letter-spacing:-.012em}
+.home-test10 .study-mode{
+ position:absolute;right:clamp(18px,2.1vw,38px);top:47%;transform:translateY(-50%);
+ z-index:5;display:flex;gap:4px;align-items:center;font-size:clamp(11px,.88vw,13px)
+}
+.home-test10 .study-mode button{
+ border:0;background:transparent;padding:0;text-transform:uppercase;color:#aaa;
+ cursor:pointer;transition:color .16s ease
+}
+.home-test10 .study-mode button[aria-pressed="true"]{color:#111;text-decoration:underline;text-underline-offset:2px}
+.home-test10 .study-mode button:hover,.home-test10 .study-mode button:focus-visible{color:var(--accent-pink,#f7a0c8)}
+.home-test10 .study-stream{
+ position:absolute;z-index:1;top:0;bottom:0;left:23%;right:23%;
+ overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;
+ scrollbar-width:none;scroll-behavior:smooth;scroll-snap-type:y proximity
+}
+.home-test10 .study-stream::-webkit-scrollbar{display:none}
+.home-test10 .stream-inner{
+ position:relative;display:flex;flex-direction:column;align-items:center;
+ gap:clamp(12px,3.8vh,64px);padding:clamp(10px,3.5vh,50px) 0 30vh
+}
+.home-test10 .stream-card{
+ position:relative;display:block;flex:none;align-self:center;
+ width:var(--size,66%);margin:0;padding:0;border:0;background:transparent;
+ transform:translateX(var(--shift,0));scroll-snap-align:center;cursor:pointer;
+ transition:opacity .2s ease
+}
+.home-test10 .stream-card img{display:block;width:100%;height:auto;max-height:45vh;object-fit:contain}
+.home-test10 .stream-card .stream-number{
+ display:block;position:absolute;right:-20px;bottom:-11px;color:#222;
+ font-size:10px;letter-spacing:-.02em;line-height:1
+}
+.home-test10 .stream-card:hover img,.home-test10 .stream-card:focus-visible img{filter:saturate(1.08)}
+.home-test10 .stream-card:focus-visible{outline:1px solid var(--accent-pink,#f7a0c8);outline-offset:6px}
+.home-test10 .study-stream.gallery-view{scroll-snap-type:none}
+.home-test10 .gallery-view .stream-inner{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(14px,2.3vw,38px);
+ align-items:start;padding-top:14vh;padding-bottom:22vh
+}
+.home-test10 .gallery-view .stream-card{width:100%;transform:none;align-self:start}
+.home-test10 .gallery-view .stream-card img{max-height:38vh;object-fit:contain}
+.home-test10 .gallery-view .stream-card .stream-number{right:0;bottom:-13px}
+.home-test10 .gallery-view .stream-card:nth-child(3n+2){margin-top:5vh}
+.home-test10 .gallery-view .stream-card:nth-child(4n+3){margin-top:3vh}
+.home-test10 #home-image{display:none}
+.home-test10.overprinting .study-stream{opacity:.09;filter:grayscale(1);pointer-events:none;transition:opacity .22s ease}
+.home-test10.overprinting .study-index{color:#ccc}
+.home-test10.overprinting .study-brand{color:#c7c7c7}
+.home-test10.overprinting .study-mode{color:#c7c7c7}
+.home-test10.overprinting .home-copy #work-links button{color:#c7c7c7}
+.home-test10 .home-overprint{z-index:8;top:19%;left:clamp(18px,2.1vw,38px);right:clamp(18px,2.1vw,38px);max-height:75%}
+.home-test10 .overprint-inner{font-size:clamp(34px,5.7vw,98px)}
+@media(max-width:850px){
+ .home-test10 .home-copy{top:24%;left:17px;transform:none;width:65%;font-size:12px}
+ .home-test10 .study-mode{top:25%;right:17px;transform:none;font-size:12px}
+ .home-test10 .study-stream{top:36%;bottom:0;left:8%;right:8%}
+ .home-test10 .stream-inner{gap:35px;padding:20px 0 26vh}
+ .home-test10 .stream-card{width:var(--mobile-size,78%);transform:none}
+ .home-test10 .stream-card img{max-height:44vh}
+ .home-test10 .gallery-view .stream-inner{padding-top:25px}
+ .home-test10 .study-index{bottom:12px;left:17px;font-size:10px;pointer-events:none}
+ .home-test10 .study-head{left:17px;right:17px;top:17px;font-size:12px}
+ .home-test10 .home-overprint{top:31%;left:17px;right:17px;max-height:62%}
+ .home-test10 .overprint-inner{font-size:clamp(29px,8vw,48px)}
+}
+@media(max-width:480px){
+ .home-test10 .study-head nav{gap:9px}
+ .home-test10 .study-head{font-size:10.5px}
+ .home-test10 .home-copy{top:18.5%;width:72%}
+ .home-test10 .study-mode{top:29%;right:17px}
+ .home-test10 .study-stream{top:36%;left:6%;right:6%}
+ .home-test10 .gallery-view .stream-inner{grid-template-columns:1fr}
+ .home-test10 .gallery-view .stream-card:nth-child(n){margin-top:0}
+}
+@media(prefers-reduced-motion:reduce){
+ .home-test10 .study-stream{scroll-behavior:auto}
+ .home-test10 .study-stream,.home-test10 .stream-card{transition:none}
+}
+</style>
+</head>
+<body>
+<main id="home" class="home home-test10">
+ <header class="study-head">
+  <span class="study-brand">DISTINCT ARCHIVES</span>
+  <nav aria-label="About and contact">
+   <button class="plain" type="button" data-go="about">About</button>
+   <button class="plain" type="button" data-go="contact">Contact</button>
+   <button class="plain" type="button" data-go="archive">Archive</button>
+  </nav>
+ </header>
+ <div class="home-copy">
+  <div class="group">
+   <div class="work-label">Selected work</div>
+   <nav class="stack" id="work-links" aria-label="Projects"></nav>
+  </div>
+ </div>
+ <div class="study-mode" role="group" aria-label="View mode">
+  <button id="mode-list" type="button" aria-pressed="true">List</button>
+  <button id="mode-gallery" type="button" aria-pressed="false">Gallery</button>
+ </div>
+ <div id="project-stream" class="study-stream" role="region" aria-label="Selected project images" tabindex="0">
+  <div class="stream-inner">
+   <button class="stream-card" type="button" data-project="wna" style="--size:49%;--mobile-size:80%;--shift:-2%" aria-label="Open Woodstock New Age">
+    <img src="/Distinct_Framer_Media/wna/Image-1.png" alt="Woodstock New Age — selected work"><span class="stream-number">(01)</span>
+   </button>
+   <button class="stream-card" type="button" data-project="nate" style="--size:77%;--mobile-size:93%;--shift:3%" aria-label="Open Nathaniel Earl">
+    <img src="/Distinct_Framer_Media/nate/Featured-Image.png" alt="Nathaniel Earl — selected work"><span class="stream-number">(02)</span>
+   </button>
+   <button class="stream-card" type="button" data-project="naif" style="--size:62%;--mobile-size:83%;--shift:-4%" aria-label="Open Naïf">
+    <img src="/Distinct_Framer_Media/naif/Image-1.jpg" alt="Naïf — selected work"><span class="stream-number">(03)</span>
+   </button>
+   <button class="stream-card" type="button" data-project="kombucha" style="--size:69%;--mobile-size:89%;--shift:5%" aria-label="Open Kombucha">
+    <img src="/Distinct_Framer_Media/kombucha/Featured-Image.png" alt="Kombucha — selected work"><span class="stream-number">(04)</span>
+   </button>
+   <button class="stream-card" type="button" data-project="xine" style="--size:53%;--mobile-size:79%;--shift:-2%" aria-label="Open Xine">
+    <img src="/Distinct_Framer_Media/xine/Featured-Image.png" alt="Xine — selected work"><span class="stream-number">(05)</span>
+   </button>
+  </div>
+ </div>
+ <p class="study-index">Independent design practice<br>Selected work / 2025–2026</p>
+ <button class="home-image" id="home-image" aria-label="Open featured project" tabindex="-1"><img src="/Distinct_Framer_Media/naif/Thumbnail-Image.png" alt=""></button>
+ <section class="home-overprint" id="home-overprint" aria-hidden="true" aria-live="polite"><div class="overprint-inner" id="overprint-inner"></div></section>
+</main>
+<section class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="Portfolio content" aria-hidden="true">
+ <div class="overlay-top"><button class="plain top-identity" id="back-home" type="button">Distinct Archives</button><button class="plain" id="close" type="button">Close</button></div>
+ <div id="overlay-body"></div>
+</section>
+<script src="/app.js"></script>
+<script>
+(function(){
+ const stream=document.getElementById('project-stream');
+ const cards=Array.from(stream.querySelectorAll('.stream-card'));
+ const buttons=Array.from(document.querySelectorAll('#work-links button'));
+ const modeList=document.getElementById('mode-list');
+ const modeGallery=document.getElementById('mode-gallery');
+ const projectNames=['wna','nate','naif','kombucha','xine'];
+ let currentlyActive='wna';
+ let pending=false;
+ const mark=(slug)=>{
+  currentlyActive=slug;
+  buttons.forEach((b,i)=>b.classList.toggle('is-selected',projectNames[i]===slug));
+  cards.forEach(c=>c.classList.toggle('is-selected',c.dataset.project===slug));
+ };
+ const scrollToProject=(slug)=>{
+  const card=cards.find(c=>c.dataset.project===slug);
+  if(!card)return;
+  const relative=card.getBoundingClientRect().top-stream.getBoundingClientRect().top+stream.scrollTop;
+  stream.scrollTo({top:Math.max(0,relative-(stream.clientHeight-card.offsetHeight)/2),behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+  mark(slug);
+ };
+ buttons.forEach((b,i)=>{
+  const slug=projectNames[i];
+  b.addEventListener('mouseenter',()=>scrollToProject(slug));
+  b.addEventListener('focus',()=>scrollToProject(slug));
+ });
+ cards.forEach(card=>{
+  const slug=card.dataset.project;
+  card.addEventListener('click',()=>open(slug));
+  card.addEventListener('focus',()=>mark(slug));
+  card.addEventListener('mouseenter',()=>mark(slug));
+ });
+ function updateActive(){
+  pending=false;
+  if(document.getElementById('home').classList.contains('overprinting'))return;
+  const center=stream.getBoundingClientRect().top+stream.clientHeight/2;
+  let best=null,distance=Infinity;
+  cards.forEach(card=>{
+   const rect=card.getBoundingClientRect();
+   const d=Math.abs((rect.top+rect.bottom)/2-center);
+   if(d<distance){distance=d;best=card}
+  });
+  if(best)mark(best.dataset.project);
+ }
+ stream.addEventListener('scroll',()=>{if(!pending){pending=true;requestAnimationFrame(updateActive)}},{passive:true});
+ function setView(mode){
+  const gallery=mode==='gallery';
+  stream.classList.toggle('gallery-view',gallery);
+  modeList.setAttribute('aria-pressed',String(!gallery));
+  modeGallery.setAttribute('aria-pressed',String(gallery));
+  stream.scrollTo({top:0,behavior:'instant'});
+  requestAnimationFrame(updateActive);
+ }
+ modeList.addEventListener('click',()=>setView('list'));
+ modeGallery.addEventListener('click',()=>setView('gallery'));
+ mark('wna');
+})();
+</script>
+</body>
+</html>
