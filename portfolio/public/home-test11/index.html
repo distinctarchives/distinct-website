@@ -34,14 +34,14 @@ html,body{height:100%;overscroll-behavior:none}
 }
 .marquee-home .marquee-track{
  display:flex;align-items:center;width:max-content;flex:none;
- animation:visual-drift 52s linear infinite;will-change:transform
+ animation:none;will-change:transform;transform:translate3d(0,0,0)
 }
-.marquee-home .marquee-viewport:hover .marquee-track:not(.drag-released),
-.marquee-home .marquee-viewport:focus-within .marquee-track:not(.drag-released){animation-play-state:paused}
-.marquee-home .marquee-viewport.is-dragging,.marquee-home .marquee-viewport.is-dragging *{cursor:grabbing!important}
+.marquee-home .marquee-viewport.is-dragging,
+.marquee-home .marquee-viewport.is-dragging *{cursor:grabbing!important}
 .marquee-home .marquee-viewport.is-dragging .marquee-item{transition:none}
-.marquee-home .marquee-viewport img{user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
-@keyframes visual-drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.marquee-home .marquee-viewport img{
+ user-select:none;-webkit-user-select:none;-webkit-user-drag:none
+}
 .marquee-home .marquee-set{display:flex;align-items:center;flex:none;width:max-content;padding:18px 0 37px}
 .marquee-home .marquee-item{
  --y:0px;
@@ -144,7 +144,7 @@ html,body{height:100%;overscroll-behavior:none}
   </div>
  </div>
  <div class="marquee-index">Selected projects and visual archive<br>2025—2026</div>
- <div class="marquee-hint">Hover to pause · Hold and drag to browse<br>Click an image to explore</div>
+ <div class="marquee-hint">Scroll to spin · Drag to flick<br>Hover to pause · Click to open</div>
  <button id="home-image" class="home-image" type="button" aria-label="Open featured project" tabindex="-1"><img src="/Distinct_Framer_Media/naif/Thumbnail-Image.png" alt=""></button>
  <section class="home-overprint" id="home-overprint" aria-hidden="true" aria-live="polite"><div class="overprint-inner" id="overprint-inner"></div></section>
 </main>
@@ -157,94 +157,150 @@ html,body{height:100%;overscroll-behavior:none}
 (function(){
  const track=document.getElementById('marquee-track');
  const set=document.getElementById('marquee-set');
+ const viewport=document.getElementById('marquee-viewport');
+ const home=document.getElementById('home');
+ const overlay=document.getElementById('overlay');
+ const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+
+ // Duplicate the reel once for seamless wraparound.
  const duplicate=set.cloneNode(true);
  duplicate.removeAttribute('id');
  duplicate.setAttribute('aria-hidden','true');
- duplicate.querySelectorAll('button').forEach(button=>button.setAttribute('tabindex','-1'));
+ duplicate.querySelectorAll('button').forEach(b=>b.setAttribute('tabindex','-1'));
  track.appendChild(duplicate);
- track.addEventListener('click',event=>{
-  const button=event.target.closest('button.marquee-item');
-  if(!button)return;
-  if(button.dataset.project){open(button.dataset.project);return;}
-  if(button.dataset.archive!==undefined){
-   open('archive');
-   const specific=document.querySelector('#overlay-body .archive-grid [data-archive="'+button.dataset.archive+'"]');
-   if(specific)specific.click();
+
+ // Position and inertia are expressed in pixels and pixels per second.
+ let width=Math.max(1,set.getBoundingClientRect().width);
+ let position=0;
+ let velocity=0;
+ let hovered=false;
+ let drag=null;
+ let ignoreClick=false;
+ let lastFrame=performance.now();
+
+ const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
+ const wrap=n=>{
+  if(width<=0)return 0;
+  const r=n%width;
+  return r>0?r-width:r;
+ };
+ const refreshWidth=()=>{
+  width=Math.max(1,set.getBoundingClientRect().width);
+  position=wrap(position);
+ };
+ if('ResizeObserver' in window)new ResizeObserver(refreshWidth).observe(set);
+ window.addEventListener('resize',refreshWidth);
+ window.addEventListener('load',refreshWidth,{once:true});
+
+ const blocked=()=>home.classList.contains('overprinting')||overlay.classList.contains('open');
+
+ function frame(now){
+  const dt=Math.min(.05,Math.max(0,(now-lastFrame)/1000));
+  lastFrame=now;
+  if(!drag?.moving&&!blocked()){
+   // A complete circuit now takes about 30 seconds (52 seconds previously).
+   const running=!hovered&&!viewport.contains(document.activeElement)&&!reduceMotion.matches;
+   const autoplay=running?-width/30:0;
+   position=wrap(position+(autoplay+velocity)*dt);
+   velocity*=Math.exp(-3.25*dt);
+   if(Math.abs(velocity)<.4)velocity=0;
+  }
+  track.style.transform='translate3d('+position.toFixed(2)+'px,0,0)';
+  requestAnimationFrame(frame);
+ }
+ requestAnimationFrame(frame);
+
+ viewport.addEventListener('pointerenter',e=>{
+  if(e.pointerType!=='touch')hovered=true;
+ });
+ viewport.addEventListener('pointerleave',e=>{
+  if(!drag||!drag.moving)hovered=false;
+ });
+
+ // Vertical mouse-wheel or horizontal trackpad scrolling spins the reel.
+ // A velocity impulse creates a gradually decaying, physical-feeling coast.
+ viewport.addEventListener('wheel',e=>{
+  if(blocked())return;
+  e.preventDefault();
+  const axis=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
+  const factor=e.deltaMode===1?16:e.deltaMode===2?viewport.clientWidth:1;
+  const delta=clamp(axis*factor,-220,220);
+  position=wrap(position-delta*.65);
+  velocity=clamp(velocity-delta*7,-2500,2500);
+ },{passive:false});
+
+ viewport.addEventListener('pointerdown',e=>{
+  if(!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0)||blocked())return;
+  ignoreClick=false;
+  drag={
+   id:e.pointerId,startX:e.clientX,lastX:e.clientX,
+   time:performance.now(),speed:0,moving:false
+  };
+ });
+
+ viewport.addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==drag.id)return;
+  const now=performance.now();
+  if(!drag.moving&&Math.abs(e.clientX-drag.startX)>7){
+   drag.moving=true;
+   velocity=0;
+   viewport.classList.add('is-dragging');
+   try{viewport.setPointerCapture(e.pointerId)}catch(_){}
+  }
+  if(drag.moving){
+   const dx=e.clientX-drag.lastX;
+   const dt=Math.max(.008,(now-drag.time)/1000);
+   position=wrap(position+dx);
+   const sample=clamp(dx/dt,-2400,2400);
+   drag.speed=drag.speed*.35+sample*.65;
+   e.preventDefault();
+  }
+  drag.lastX=e.clientX;
+  drag.time=now;
+ });
+
+ const endDrag=e=>{
+  if(!drag||e.pointerId!==drag.id)return;
+  if(drag.moving){
+   velocity=clamp(drag.speed,-2000,2000);
+   viewport.classList.remove('is-dragging');
+   ignoreClick=true;
+   // Some browsers delay their synthetic click after pointerup.
+   setTimeout(()=>{ignoreClick=false},350);
+   try{if(viewport.hasPointerCapture(e.pointerId))viewport.releasePointerCapture(e.pointerId)}catch(_){}
+  }
+  drag=null;
+ };
+ viewport.addEventListener('pointerup',endDrag);
+ viewport.addEventListener('pointercancel',endDrag);
+ viewport.addEventListener('lostpointercapture',()=>{
+  if(drag?.moving){
+   viewport.classList.remove('is-dragging');
+   drag=null;
   }
  });
 
- // Holding and dragging scrubs the image band. A simple click still opens an item.
- const viewport=document.getElementById('marquee-viewport');
- const durationSeconds=52;
- let gesture=null;
- let suppressNextClick=false;
- const setWidth=()=>set.getBoundingClientRect().width||1;
- const normalize=(px,width)=>{let n=px%width;if(n>0)n-=width;return n;};
- const currentX=()=>{
-  const transform=getComputedStyle(track).transform;
-  if(!transform||transform==='none')return 0;
-  return new DOMMatrixReadOnly(transform).m41;
- };
- const clearSuppression=()=>{
-  // A drag normally ends with a click on the captured viewport; guard against browsers
-  // that deliver that click to the original image instead.
-  if(suppressNextClick)setTimeout(()=>{suppressNextClick=false},300);
- };
- viewport.addEventListener('pointerenter',()=>{
-  track.classList.remove('drag-released');
- });
- viewport.addEventListener('pointerdown',event=>{
-  if(!event.isPrimary||(event.pointerType==='mouse'&&event.button!==0))return;
-  suppressNextClick=false;
-  gesture={id:event.pointerId,startX:event.clientX,startOffset:currentX(),dragging:false};
- });
- viewport.addEventListener('pointermove',event=>{
-  if(!gesture||event.pointerId!==gesture.id)return;
-  const distance=event.clientX-gesture.startX;
-  if(!gesture.dragging){
-   if(Math.abs(distance)<7)return;
-   gesture.dragging=true;
-   gesture.startOffset=currentX();
-   viewport.classList.add('is-dragging');
-   track.style.animation='none';
-   try{viewport.setPointerCapture(event.pointerId)}catch(err){}
-  }
-  const x=normalize(gesture.startOffset+distance,setWidth());
-  track.style.transform='translate3d('+x+'px,0,0)';
-  event.preventDefault();
- });
- function endGesture(event){
-  if(!gesture||event.pointerId!==gesture.id)return;
-  if(gesture.dragging){
-   const width=setWidth();
-   const offset=normalize(currentX(),width);
-   // Resume from the same visual position, rather than snapping to the beginning.
-   track.classList.add('drag-released');
-   track.style.animationDelay=(offset/width*durationSeconds)+'s';
-   track.style.transform='';
-   track.style.removeProperty('animation');
-   viewport.classList.remove('is-dragging');
-   suppressNextClick=true;
-   clearSuppression();
-   try{if(viewport.hasPointerCapture(event.pointerId))viewport.releasePointerCapture(event.pointerId)}catch(err){}
-  }
-  gesture=null;
- }
- viewport.addEventListener('pointerup',endGesture);
- viewport.addEventListener('pointercancel',endGesture);
- viewport.addEventListener('pointerleave',()=>{
-  if(!gesture||!gesture.dragging)track.classList.remove('drag-released');
- });
- viewport.addEventListener('click',event=>{
-  if(!suppressNextClick)return;
-  event.preventDefault();event.stopImmediatePropagation();
-  suppressNextClick=false;
+ viewport.addEventListener('click',e=>{
+  if(!ignoreClick)return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  ignoreClick=false;
  },true);
 
- // Pause the moving strip whenever the About or Contact overprint is open.
- const overprint=document.getElementById('home');
- new MutationObserver(()=>{track.style.animationPlayState=overprint.classList.contains('overprinting')?'paused':''})
-  .observe(overprint,{attributes:true,attributeFilter:['class']});
+ // Keep genuine clicks on both original and duplicated items functional.
+ track.addEventListener('click',e=>{
+  const button=e.target.closest('button.marquee-item');
+  if(!button)return;
+  if(button.dataset.project){
+   open(button.dataset.project);
+  }else if(button.dataset.archive!==undefined){
+   open('archive');
+   const imageButton=document.querySelector(
+    '#overlay-body .archive-grid [data-archive="'+button.dataset.archive+'"]'
+   );
+   if(imageButton)imageButton.click();
+  }
+ });
 })();
 </script>
 </body>
