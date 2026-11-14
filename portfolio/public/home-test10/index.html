@@ -218,7 +218,7 @@ html,body{height:100%;overflow:hidden}
   stream.classList.toggle('gallery-view',gallery);
   modeList.setAttribute('aria-pressed',String(!gallery));
   modeGallery.setAttribute('aria-pressed',String(gallery));
-  stream.scrollTo({top:0,behavior:'instant'});
+  stream.scrollTo({top:0,behavior:'auto'});
   requestAnimationFrame(updateActive);
  }
  modeList.addEventListener('click',()=>setView('list'));
