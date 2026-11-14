@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Distinct Archives — moving visual archive homepage study.">
+<title>Distinct Archives — Moving Archive / Test 11</title>
+<base href="/">
+<link rel="stylesheet" href="/style.css">
+<style>
+/* Test 11 — editorial moving archive. This is intentionally isolated from the live homepage. */
+:root{--studio-pink:#f7a0c8}
+html,body{height:100%;overscroll-behavior:none}
+#home.marquee-home{position:fixed;inset:0;width:100%;height:100dvh;min-height:0;background:#fff;overflow:hidden}
+.marquee-home .home-copy{
+  position:absolute;z-index:6;top:clamp(18px,3vh,32px);left:clamp(15px,2.1vw,37px);
+  width:min(740px,76vw);transform:none;font-size:clamp(11px,.91vw,13px);
+  line-height:1.13;letter-spacing:-.01em
+}
+.marquee-home .home-copy .intro{margin:0 0 9px;max-width:670px}
+.marquee-home .home-copy .group{margin-top:12px}
+.marquee-home .home-copy .group p{margin:0}
+.marquee-home #work-links{display:flex;flex-direction:column;align-items:flex-start}
+.marquee-home #work-links button{white-space:normal;line-height:1.14}
+.marquee-home .marquee-stage{
+ position:absolute;left:0;right:0;top:45.5%;height:min(46vh,410px);
+ z-index:2;display:flex;align-items:center;pointer-events:none;
+}
+.marquee-home .marquee-viewport{
+ position:relative;overflow:hidden;width:100%;height:100%;
+ pointer-events:auto;display:flex;align-items:center;
+ -webkit-mask-image:linear-gradient(to right,transparent 0,#000 2%,#000 98%,transparent 100%);
+ mask-image:linear-gradient(to right,transparent 0,#000 2%,#000 98%,transparent 100%);
+}
+.marquee-home .marquee-track{
+ display:flex;align-items:center;width:max-content;flex:none;
+ animation:visual-drift 68s linear infinite;will-change:transform
+}
+.marquee-home .marquee-viewport:hover .marquee-track,
+.marquee-home .marquee-viewport:focus-within .marquee-track{animation-play-state:paused}
+@keyframes visual-drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.marquee-home .marquee-set{display:flex;align-items:center;flex:none;width:max-content;padding:18px 0 37px}
+.marquee-home .marquee-item{
+ --y:0px;
+ display:block;flex:none;position:relative;z-index:1;
+ border:0;background:transparent;padding:0;margin:0 0 0 -20px;
+ width:var(--w,190px);height:var(--h,230px);
+ transform:translateY(var(--y)) rotate(var(--rot,0deg));
+ cursor:pointer;transition:transform .26s ease,filter .2s ease;
+}
+.marquee-home .marquee-item:first-child{margin-left:0}
+.marquee-home .marquee-item img{display:block;width:100%;height:100%;object-fit:cover}
+.marquee-home .marquee-item:hover,.marquee-home .marquee-item:focus-visible{
+ z-index:40;transform:translateY(var(--y)) scale(1.065) rotate(0deg);
+ filter:saturate(1.04)
+}
+.marquee-home .marquee-item:focus-visible{outline:2px solid var(--studio-pink);outline-offset:4px}
+.marquee-home .marquee-item .image-caption{
+ position:absolute;left:0;bottom:-24px;max-width:100%;
+ font-size:11px;letter-spacing:-.01em;white-space:nowrap;
+ color:#1b1b1b;background:#fff;padding:3px 5px 3px 0;
+ opacity:0;transform:translateY(3px);transition:opacity .15s ease,transform .15s ease
+}
+.marquee-home .marquee-item:hover .image-caption,
+.marquee-home .marquee-item:focus-visible .image-caption{opacity:1;transform:none}
+.marquee-home .marquee-item .image-caption span{color:var(--studio-pink)}
+.marquee-home .marquee-index{
+ position:absolute;z-index:4;bottom:clamp(17px,3vh,38px);left:clamp(15px,2.1vw,37px);
+ font-size:clamp(10px,.8vw,12px);line-height:1.16;letter-spacing:-.012em;color:#999;
+}
+.marquee-home .marquee-hint{
+ position:absolute;z-index:4;bottom:clamp(17px,3vh,38px);right:clamp(15px,2.1vw,37px);
+ font-size:clamp(10px,.8vw,12px);line-height:1.16;letter-spacing:-.012em;color:#999;text-align:right;
+}
+.marquee-home #home-image{display:none}
+.marquee-home .home-overprint{z-index:9}
+.marquee-home.overprinting .marquee-stage{opacity:.1;filter:grayscale(1);transition:opacity .24s ease;pointer-events:none}
+.marquee-home.overprinting .marquee-hint,
+.marquee-home.overprinting .marquee-index{color:#d0d0d0}
+.marquee-home.overprinting .home-copy{z-index:6}
+.marquee-home .marquee-stage .marquee-item:is(:active,:focus-visible) .image-caption{color:var(--studio-pink)}
+@media(max-width:800px){
+ .marquee-home .home-copy{top:17px;left:17px;width:calc(100% - 34px);font-size:12px}
+ .marquee-home .home-copy .intro{max-width:92%}
+ .marquee-home .marquee-stage{top:43%;height:46vh}
+ .marquee-home .marquee-item{width:calc(var(--w,190px)*.78);height:calc(var(--h,230px)*.78);margin-left:-15px}
+ .marquee-home .marquee-hint{right:17px}
+ .marquee-home .marquee-index{left:17px}
+ .marquee-home .home-overprint{top:25%;left:17px;right:17px;max-height:69%}
+ .marquee-home .overprint-inner{font-size:clamp(32px,8vw,58px)}
+}
+@media(max-width:500px){
+ .marquee-home .home-copy .intro{max-width:100%}
+ .marquee-home .marquee-stage{top:48%;height:39vh}
+ .marquee-home .marquee-item{width:calc(var(--w,190px)*.65);height:calc(var(--h,230px)*.65);margin-left:-13px}
+ .marquee-home .marquee-hint{max-width:47%}
+ .marquee-home .marquee-viewport{-webkit-mask-image:none;mask-image:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .marquee-home .marquee-track{animation:none}
+ .marquee-home .marquee-set[aria-hidden="true"]{display:none}
+ .marquee-home .marquee-viewport{overflow-x:auto}
+ .marquee-home .marquee-item{transition:none}
+}
+</style>
+</head>
+<body>
+<main id="home" class="home marquee-home">
+ <div class="home-copy">
+  <p class="intro">Distinct Archives is an independent design practice working across visual identities, art direction, editorial design and digital experiences. The practice develops visual systems for people, places and ideas.</p>
+  <div class="group">
+   <div>Selected work</div>
+   <nav class="stack" id="work-links" aria-label="Selected projects"></nav>
+  </div>
+  <div class="group">
+   <div>Practice</div>
+   <button class="plain" data-go="about" type="button">About</button>
+   <button class="plain" data-go="contact" type="button">Contact</button>
+   <button class="plain" data-go="archive" type="button">Visual archive</button>
+  </div>
+  <div class="group"><p>Distinct Archives<br>Independent brand design practice</p></div>
+ </div>
+ <div class="marquee-stage">
+  <div class="marquee-viewport" id="marquee-viewport" aria-label="Moving images from projects and visual archive">
+   <div class="marquee-track" id="marquee-track">
+    <div class="marquee-set" id="marquee-set">
+     <button class="marquee-item" style="--w:175px;--h:220px;--y:-29px;--rot:-1.1deg" data-project="naif" aria-label="Open Naïf project"><img src="/Distinct_Framer_Media/naif/Image-1.jpg" alt="Naïf — visual identity" draggable="false"><span class="image-caption">Naïf <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:115px;--h:169px;--y:48px;--rot:1.4deg" data-archive="2" aria-label="Open archive image 036"><img src="/Distinct_Framer_Media/036/Image.png" alt="Visual archive image 036" draggable="false"><span class="image-caption">Archive / 036 <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:244px;--h:178px;--y:-47px;--rot:-.6deg" data-project="nate" aria-label="Open Nathaniel Earl project"><img src="/Distinct_Framer_Media/nate/Featured-Image.png" alt="Nathaniel Earl — project artwork" draggable="false"><span class="image-caption">Nathaniel Earl <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:171px;--h:240px;--y:22px;--rot:.8deg" data-archive="7" aria-label="Open archive image 031"><img src="/Distinct_Framer_Media/031/Image.png" alt="Visual archive image 031" draggable="false"><span class="image-caption">Archive / 031 <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:212px;--h:165px;--y:-8px;--rot:-1.2deg" data-project="wna" aria-label="Open Woodstock New Age project"><img src="/Distinct_Framer_Media/wna/Image-1.png" alt="Woodstock New Age — visual design" draggable="false"><span class="image-caption">Woodstock New Age <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:148px;--h:207px;--y:40px;--rot:.5deg" data-archive="12" aria-label="Open archive image 026"><img src="/Distinct_Framer_Media/026/Image.png" alt="Visual archive image 026" draggable="false"><span class="image-caption">Archive / 026 <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:180px;--h:236px;--y:-39px;--rot:1deg" data-project="kombucha" aria-label="Open Kombucha project"><img src="/Distinct_Framer_Media/kombucha/Featured-Image.png" alt="Kombucha — packaging design" draggable="false"><span class="image-caption">Kombucha <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:124px;--h:165px;--y:34px;--rot:-1.3deg" data-archive="19" aria-label="Open archive image 019"><img src="/Distinct_Framer_Media/019/Image.jpg" alt="Visual archive image 019" draggable="false"><span class="image-caption">Archive / 019 <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:205px;--h:169px;--y:-38px;--rot:.5deg" data-project="xine" aria-label="Open Xine project"><img src="/Distinct_Framer_Media/xine/Featured-Image.png" alt="Xine — graphic design" draggable="false"><span class="image-caption">Xine <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:138px;--h:228px;--y:15px;--rot:1.2deg" data-archive="27" aria-label="Open archive image 011"><img src="/Distinct_Framer_Media/011/Image.png" alt="Visual archive image 011" draggable="false"><span class="image-caption">Archive / 011 <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:186px;--h:232px;--y:-28px;--rot:-.8deg" data-project="naif" aria-label="Open Naïf project"><img src="/Distinct_Framer_Media/naif/Image-2.jpg" alt="Naïf — project photograph" draggable="false"><span class="image-caption">Naïf <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:195px;--h:148px;--y:39px;--rot:.8deg" data-archive="32" aria-label="Open archive image 006"><img src="/Distinct_Framer_Media/006/Image.png" alt="Visual archive image 006" draggable="false"><span class="image-caption">Archive / 006 <span>↗</span></span></button>
+    </div>
+   </div>
+  </div>
+ </div>
+ <div class="marquee-index">Selected projects and visual archive<br>2025—2026</div>
+ <div class="marquee-hint">Move cursor over images to pause<br>Select an image to explore</div>
+ <button id="home-image" class="home-image" type="button" aria-label="Open featured project" tabindex="-1"><img src="/Distinct_Framer_Media/naif/Thumbnail-Image.png" alt=""></button>
+ <section class="home-overprint" id="home-overprint" aria-hidden="true" aria-live="polite"><div class="overprint-inner" id="overprint-inner"></div></section>
+</main>
+<section class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="Portfolio content" aria-hidden="true">
+ <div class="overlay-top"><button class="plain top-identity" id="back-home" type="button">Distinct Archives</button><button class="plain" id="close" type="button">Close</button></div>
+ <div id="overlay-body"></div>
+</section>
+<script src="/app.js"></script>
+<script>
+(function(){
+ const track=document.getElementById('marquee-track');
+ const set=document.getElementById('marquee-set');
+ const duplicate=set.cloneNode(true);
+ duplicate.removeAttribute('id');
+ duplicate.setAttribute('aria-hidden','true');
+ duplicate.querySelectorAll('button').forEach(button=>button.setAttribute('tabindex','-1'));
+ track.appendChild(duplicate);
+ track.addEventListener('click',event=>{
+  const button=event.target.closest('button.marquee-item');
+  if(!button)return;
+  if(button.dataset.project){open(button.dataset.project);return;}
+  if(button.dataset.archive!==undefined){
+   open('archive');
+   const specific=document.querySelector('#overlay-body .archive-grid [data-archive="'+button.dataset.archive+'"]');
+   if(specific)specific.click();
+  }
+ });
+ // Pause the moving strip whenever the About or Contact overprint is open.
+ const overprint=document.getElementById('home');
+ new MutationObserver(()=>{track.style.animationPlayState=overprint.classList.contains('overprinting')?'paused':''})
+  .observe(overprint,{attributes:true,attributeFilter:['class']});
+})();
+</script>
+</body>
+</html>
