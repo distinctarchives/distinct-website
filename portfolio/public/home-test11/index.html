@@ -30,15 +30,17 @@ html,body{height:100%;overscroll-behavior:none}
 .marquee-home .marquee-viewport{
  position:relative;overflow:hidden;width:100%;height:100%;
  pointer-events:auto;display:flex;align-items:center;
- -webkit-mask-image:linear-gradient(to right,transparent 0,#000 2%,#000 98%,transparent 100%);
- mask-image:linear-gradient(to right,transparent 0,#000 2%,#000 98%,transparent 100%);
+ touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:grab;
 }
 .marquee-home .marquee-track{
  display:flex;align-items:center;width:max-content;flex:none;
- animation:visual-drift 68s linear infinite;will-change:transform
+ animation:visual-drift 52s linear infinite;will-change:transform
 }
-.marquee-home .marquee-viewport:hover .marquee-track,
-.marquee-home .marquee-viewport:focus-within .marquee-track{animation-play-state:paused}
+.marquee-home .marquee-viewport:hover .marquee-track:not(.drag-released),
+.marquee-home .marquee-viewport:focus-within .marquee-track:not(.drag-released){animation-play-state:paused}
+.marquee-home .marquee-viewport.is-dragging,.marquee-home .marquee-viewport.is-dragging *{cursor:grabbing!important}
+.marquee-home .marquee-viewport.is-dragging .marquee-item{transition:none}
+.marquee-home .marquee-viewport img{user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
 @keyframes visual-drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .marquee-home .marquee-set{display:flex;align-items:center;flex:none;width:max-content;padding:18px 0 37px}
 .marquee-home .marquee-item{
@@ -142,7 +144,7 @@ html,body{height:100%;overscroll-behavior:none}
   </div>
  </div>
  <div class="marquee-index">Selected projects and visual archive<br>2025—2026</div>
- <div class="marquee-hint">Move cursor over images to pause<br>Select an image to explore</div>
+ <div class="marquee-hint">Hover to pause · Hold and drag to browse<br>Click an image to explore</div>
  <button id="home-image" class="home-image" type="button" aria-label="Open featured project" tabindex="-1"><img src="/Distinct_Framer_Media/naif/Thumbnail-Image.png" alt=""></button>
  <section class="home-overprint" id="home-overprint" aria-hidden="true" aria-live="polite"><div class="overprint-inner" id="overprint-inner"></div></section>
 </main>
@@ -170,6 +172,75 @@ html,body{height:100%;overscroll-behavior:none}
    if(specific)specific.click();
   }
  });
+
+ // Holding and dragging scrubs the image band. A simple click still opens an item.
+ const viewport=document.getElementById('marquee-viewport');
+ const durationSeconds=52;
+ let gesture=null;
+ let suppressNextClick=false;
+ const setWidth=()=>set.getBoundingClientRect().width||1;
+ const normalize=(px,width)=>{let n=px%width;if(n>0)n-=width;return n;};
+ const currentX=()=>{
+  const transform=getComputedStyle(track).transform;
+  if(!transform||transform==='none')return 0;
+  return new DOMMatrixReadOnly(transform).m41;
+ };
+ const clearSuppression=()=>{
+  // A drag normally ends with a click on the captured viewport; guard against browsers
+  // that deliver that click to the original image instead.
+  if(suppressNextClick)setTimeout(()=>{suppressNextClick=false},300);
+ };
+ viewport.addEventListener('pointerenter',()=>{
+  track.classList.remove('drag-released');
+ });
+ viewport.addEventListener('pointerdown',event=>{
+  if(!event.isPrimary||(event.pointerType==='mouse'&&event.button!==0))return;
+  suppressNextClick=false;
+  gesture={id:event.pointerId,startX:event.clientX,startOffset:currentX(),dragging:false};
+ });
+ viewport.addEventListener('pointermove',event=>{
+  if(!gesture||event.pointerId!==gesture.id)return;
+  const distance=event.clientX-gesture.startX;
+  if(!gesture.dragging){
+   if(Math.abs(distance)<7)return;
+   gesture.dragging=true;
+   gesture.startOffset=currentX();
+   viewport.classList.add('is-dragging');
+   track.style.animation='none';
+   try{viewport.setPointerCapture(event.pointerId)}catch(err){}
+  }
+  const x=normalize(gesture.startOffset+distance,setWidth());
+  track.style.transform='translate3d('+x+'px,0,0)';
+  event.preventDefault();
+ });
+ function endGesture(event){
+  if(!gesture||event.pointerId!==gesture.id)return;
+  if(gesture.dragging){
+   const width=setWidth();
+   const offset=normalize(currentX(),width);
+   // Resume from the same visual position, rather than snapping to the beginning.
+   track.classList.add('drag-released');
+   track.style.animationDelay=(offset/width*durationSeconds)+'s';
+   track.style.transform='';
+   track.style.removeProperty('animation');
+   viewport.classList.remove('is-dragging');
+   suppressNextClick=true;
+   clearSuppression();
+   try{if(viewport.hasPointerCapture(event.pointerId))viewport.releasePointerCapture(event.pointerId)}catch(err){}
+  }
+  gesture=null;
+ }
+ viewport.addEventListener('pointerup',endGesture);
+ viewport.addEventListener('pointercancel',endGesture);
+ viewport.addEventListener('pointerleave',()=>{
+  if(!gesture||!gesture.dragging)track.classList.remove('drag-released');
+ });
+ viewport.addEventListener('click',event=>{
+  if(!suppressNextClick)return;
+  event.preventDefault();event.stopImmediatePropagation();
+  suppressNextClick=false;
+ },true);
+
  // Pause the moving strip whenever the About or Contact overprint is open.
  const overprint=document.getElementById('home');
  new MutationObserver(()=>{track.style.animationPlayState=overprint.classList.contains('overprinting')?'paused':''})
