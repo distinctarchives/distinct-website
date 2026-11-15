@@ -34,7 +34,7 @@ html,body{height:100%;overscroll-behavior:none}
 .marquee-home .marquee-viewport{
  position:relative;overflow:hidden;width:100%;height:100%;
  pointer-events:auto;display:flex;align-items:center;
- touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:grab;
+ touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;
 }
 .marquee-home .marquee-track{
  display:flex;align-items:center;width:max-content;flex:none;
@@ -103,10 +103,16 @@ html,body{height:100%;overscroll-behavior:none}
  .marquee-home .marquee-hint{max-width:47%}
  .marquee-home .marquee-viewport{-webkit-mask-image:none;mask-image:none}
 }
+.marquee-home .motion-toggle{
+ position:absolute;z-index:5;bottom:clamp(17px,3vh,38px);left:50%;
+ transform:translateX(-50%);display:none;border:1px solid #c9c9c9;
+ border-radius:0;background:#fff;padding:5px 9px;cursor:pointer;
+ font-size:11px;line-height:1.15;color:#141414
+}
 @media(prefers-reduced-motion:reduce){
- .marquee-home .marquee-track{animation:none}
- .marquee-home .marquee-set[aria-hidden="true"]{display:none}
- .marquee-home .marquee-viewport{overflow-x:auto}
+ .marquee-home .motion-toggle{display:inline-block}
+ .marquee-home:not(.motion-enabled) .marquee-set[aria-hidden="true"]{display:none}
+ .marquee-home:not(.motion-enabled) .marquee-viewport{overflow-x:auto}
  .marquee-home .marquee-item{transition:none}
 }
 </style>
@@ -148,7 +154,8 @@ html,body{height:100%;overscroll-behavior:none}
   </div>
  </div>
 
- <div class="marquee-hint">Scroll to spin · Drag to flick<br>Hover to pause · Click to open</div>
+ <div class="marquee-hint">Swipe or scroll to spin<br>Tap an image to explore</div>
+ <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Play motion</button>
  <button id="home-image" class="home-image" type="button" aria-label="Open featured project" tabindex="-1"><img src="/Distinct_Framer_Media/naif/Thumbnail-Image.png" alt=""></button>
  <section class="home-overprint" id="home-overprint" aria-hidden="true" aria-live="polite"><div class="overprint-inner" id="overprint-inner"></div></section>
 </main>
@@ -164,67 +171,75 @@ html,body{height:100%;overscroll-behavior:none}
  const viewport=document.getElementById('marquee-viewport');
  const home=document.getElementById('home');
  const overlay=document.getElementById('overlay');
+ const toggle=document.getElementById('motion-toggle');
  const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
-
- // Duplicate the reel once for seamless wraparound.
+ const finePointer=window.matchMedia('(hover: hover) and (pointer: fine)');
  const duplicate=set.cloneNode(true);
  duplicate.removeAttribute('id');
  duplicate.setAttribute('aria-hidden','true');
- duplicate.querySelectorAll('button').forEach(b=>b.setAttribute('tabindex','-1'));
+ duplicate.querySelectorAll('button').forEach(button=>button.setAttribute('tabindex','-1'));
  track.appendChild(duplicate);
 
- // Position and inertia are expressed in pixels and pixels per second.
  let width=Math.max(1,set.getBoundingClientRect().width);
- let position=0;
- let velocity=0;
- let hovered=false;
- let drag=null;
- let ignoreClick=false;
+ let position=0,velocity=0;
+ let hovered=false,gesture=null;
+ let ignoreClickUntil=0,paused=reduceMotion.matches;
  let lastFrame=performance.now();
 
- const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
- const wrap=n=>{
-  if(width<=0)return 0;
-  const r=n%width;
-  return r>0?r-width:r;
- };
+ const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
+ const wrap=n=>{const r=n%width;return r>0?r-width:r;};
  const refreshWidth=()=>{
-  width=Math.max(1,set.getBoundingClientRect().width);
-  position=wrap(position);
+  const next=set.getBoundingClientRect().width;
+  if(next>1){width=next;position=wrap(position);}
  };
  if('ResizeObserver' in window)new ResizeObserver(refreshWidth).observe(set);
- window.addEventListener('resize',refreshWidth);
  window.addEventListener('load',refreshWidth,{once:true});
+ window.addEventListener('resize',refreshWidth);
 
  const blocked=()=>home.classList.contains('overprinting')||overlay.classList.contains('open');
+ const updateToggle=()=>{
+  toggle.textContent=paused?'Play motion':'Pause motion';
+  toggle.setAttribute('aria-pressed',String(!paused));
+  home.classList.toggle('motion-enabled',!paused);
+ };
+ updateToggle();
+ toggle.addEventListener('click',()=>{
+  paused=!paused;
+  if(paused)velocity=0;
+  refreshWidth();updateToggle();
+ });
+ if('addEventListener' in reduceMotion)reduceMotion.addEventListener('change',e=>{
+  paused=e.matches;velocity=0;updateToggle();refreshWidth();
+ });
 
  function frame(now){
   const dt=Math.min(.05,Math.max(0,(now-lastFrame)/1000));
   lastFrame=now;
-  if(!drag?.moving&&!blocked()){
-   // A complete circuit now takes about 30 seconds (52 seconds previously).
-   const running=!hovered&&!viewport.contains(document.activeElement)&&!reduceMotion.matches;
-   const autoplay=running?-width/30:0;
+  if(!gesture&&!blocked()&&!paused){
+   // Approximately 28 seconds per full set, with additional momentum from gestures.
+   const autoRun=!(finePointer.matches&&hovered)&&!(finePointer.matches&&viewport.contains(document.activeElement));
+   const autoplay=autoRun?-width/28:0;
    position=wrap(position+(autoplay+velocity)*dt);
-   velocity*=Math.exp(-3.25*dt);
-   if(Math.abs(velocity)<.4)velocity=0;
+   velocity*=Math.exp(-3.1*dt);
+   if(Math.abs(velocity)<.5)velocity=0;
   }
   track.style.transform='translate3d('+position.toFixed(2)+'px,0,0)';
   requestAnimationFrame(frame);
  }
  requestAnimationFrame(frame);
 
+ // Hover pauses automatic drift on desktop only. Touchscreens keep drifting
+ // after tapping an image, rather than treating touch focus as a mouse hover.
  viewport.addEventListener('pointerenter',e=>{
-  if(e.pointerType!=='touch')hovered=true;
+  if(finePointer.matches&&e.pointerType==='mouse')hovered=true;
  });
  viewport.addEventListener('pointerleave',e=>{
-  if(!drag||!drag.moving)hovered=false;
+  if(e.pointerType==='mouse')hovered=false;
  });
 
- // Vertical mouse-wheel or horizontal trackpad scrolling spins the reel.
- // A velocity impulse creates a gradually decaying, physical-feeling coast.
+ // Mouse wheel / trackpad: both vertical and horizontal scroll spin the reel.
  viewport.addEventListener('wheel',e=>{
-  if(blocked())return;
+  if(blocked()||paused)return;
   e.preventDefault();
   const axis=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
   const factor=e.deltaMode===1?16:e.deltaMode===2?viewport.clientWidth:1;
@@ -233,65 +248,85 @@ html,body{height:100%;overscroll-behavior:none}
   velocity=clamp(velocity-delta*7,-2500,2500);
  },{passive:false});
 
- viewport.addEventListener('pointerdown',e=>{
-  if(!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0)||blocked())return;
-  ignoreClick=false;
-  drag={
-   id:e.pointerId,startX:e.clientX,lastX:e.clientX,
-   time:performance.now(),speed:0,moving:false
-  };
- });
-
- viewport.addEventListener('pointermove',e=>{
-  if(!drag||e.pointerId!==drag.id)return;
-  const now=performance.now();
-  if(!drag.moving&&Math.abs(e.clientX-drag.startX)>7){
-   drag.moving=true;
+ function beginGesture(id,x,y){
+  if(blocked())return;
+  gesture={id,startX:x,startY:y,lastX:x,lastY:y,time:performance.now(),speed:0,axis:null,moving:false};
+ }
+ function moveGesture(x,y,e){
+  if(!gesture)return;
+  const now=performance.now(),dx=x-gesture.lastX,dy=y-gesture.lastY;
+  if(!gesture.moving){
+   const totalX=x-gesture.startX,totalY=y-gesture.startY;
+   if(Math.hypot(totalX,totalY)<7)return;
+   gesture.moving=true;
+   gesture.axis=Math.abs(totalX)>=Math.abs(totalY)*.9?'x':'y';
    velocity=0;
    viewport.classList.add('is-dragging');
-   try{viewport.setPointerCapture(e.pointerId)}catch(_){}
   }
-  if(drag.moving){
-   const dx=e.clientX-drag.lastX;
-   const dt=Math.max(.008,(now-drag.time)/1000);
-   position=wrap(position+dx);
-   const sample=clamp(dx/dt,-2400,2400);
-   drag.speed=drag.speed*.35+sample*.65;
-   e.preventDefault();
-  }
-  drag.lastX=e.clientX;
-  drag.time=now;
- });
-
- const endDrag=e=>{
-  if(!drag||e.pointerId!==drag.id)return;
-  if(drag.moving){
-   velocity=clamp(drag.speed,-2000,2000);
+  // In the fixed mobile layout, vertical swipes also browse the horizontal reel.
+  const movement=gesture.axis==='x'?dx:dy*.8;
+  const dt=Math.max(.008,(now-gesture.time)/1000);
+  position=wrap(position+movement);
+  const sample=clamp(movement/dt,-2600,2600);
+  gesture.speed=gesture.speed*.38+sample*.62;
+  gesture.lastX=x;gesture.lastY=y;gesture.time=now;
+  if(e&&e.cancelable)e.preventDefault();
+ }
+ function endGesture(){
+  if(!gesture)return;
+  if(gesture.moving){
+   velocity=clamp(gesture.speed,-2300,2300);
+   ignoreClickUntil=performance.now()+550;
    viewport.classList.remove('is-dragging');
-   ignoreClick=true;
-   // Some browsers delay their synthetic click after pointerup.
-   setTimeout(()=>{ignoreClick=false},350);
-   try{if(viewport.hasPointerCapture(e.pointerId))viewport.releasePointerCapture(e.pointerId)}catch(_){}
   }
-  drag=null;
- };
- viewport.addEventListener('pointerup',endDrag);
- viewport.addEventListener('pointercancel',endDrag);
- viewport.addEventListener('lostpointercapture',()=>{
-  if(drag?.moving){
-   viewport.classList.remove('is-dragging');
-   drag=null;
-  }
- });
-
+  gesture=null;
+ }
  viewport.addEventListener('click',e=>{
-  if(!ignoreClick)return;
-  e.preventDefault();
-  e.stopImmediatePropagation();
-  ignoreClick=false;
+  if(performance.now()>=ignoreClickUntil)return;
+  e.preventDefault();e.stopImmediatePropagation();
+  ignoreClickUntil=0;
  },true);
 
- // Keep genuine clicks on both original and duplicated items functional.
+ // Mouse and pen use pointer events; mobile Safari uses native touch events.
+ viewport.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='touch'||!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0))return;
+  ignoreClickUntil=0;beginGesture(e.pointerId,e.clientX,e.clientY);
+ });
+ viewport.addEventListener('pointermove',e=>{
+  if(!gesture||e.pointerType==='touch'||gesture.id!==e.pointerId)return;
+  if(!gesture.moving&&Math.hypot(e.clientX-gesture.startX,e.clientY-gesture.startY)<7)return;
+  moveGesture(e.clientX,e.clientY,e);
+  if(gesture?.moving&& !viewport.hasPointerCapture(e.pointerId)){
+   try{viewport.setPointerCapture(e.pointerId)}catch(_){}
+  }
+ });
+ viewport.addEventListener('pointerup',e=>{
+  if(e.pointerType==='touch'||!gesture||gesture.id!==e.pointerId)return;
+  endGesture();
+  try{if(viewport.hasPointerCapture(e.pointerId))viewport.releasePointerCapture(e.pointerId)}catch(_){}
+ });
+ viewport.addEventListener('pointercancel',e=>{if(e.pointerType!=='touch')endGesture();});
+ viewport.addEventListener('lostpointercapture',()=>{if(gesture)endGesture();});
+
+ // Dedicated touch handling avoids the touch-action:pan-y cancellation that
+ // previously prevented dragging on iPhones and other mobile browsers.
+ viewport.addEventListener('touchstart',e=>{
+  if(e.touches.length!==1||blocked())return;
+  const touch=e.touches[0];
+  ignoreClickUntil=0;beginGesture(touch.identifier,touch.clientX,touch.clientY);
+ },{passive:true});
+ viewport.addEventListener('touchmove',e=>{
+  if(!gesture||e.touches.length!==1)return;
+  const touch=e.touches[0];
+  if(touch.identifier!==gesture.id)return;
+  moveGesture(touch.clientX,touch.clientY,e);
+ },{passive:false});
+ viewport.addEventListener('touchend',e=>{
+  if(!gesture)return;
+  for(const t of e.changedTouches){if(t.identifier===gesture.id){endGesture();break;}}
+ },{passive:true});
+ viewport.addEventListener('touchcancel',()=>endGesture(),{passive:true});
+
  track.addEventListener('click',e=>{
   const button=e.target.closest('button.marquee-item');
   if(!button)return;
