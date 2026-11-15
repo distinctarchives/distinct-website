@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#f4f4f2">
+<title>Distinct Archives — Mobile Preview</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+*{box-sizing:border-box}
+:root{--ink:#161616;--paper:#f4f4f2;--muted:#777}
+html,body{margin:0;min-height:100%;background:var(--paper);font-family:Arial,Helvetica,sans-serif;color:var(--ink)}
+button,a{font:inherit;color:inherit}
+.shell{min-height:100dvh;display:grid;grid-template-columns:minmax(230px,300px) minmax(0,1fr);align-items:start}
+.controls{padding:31px 26px;position:sticky;top:0}
+.studio{font-size:13px;font-weight:700;margin-bottom:43px}
+.eyebrow{font-size:11px;color:#8a8a8a;text-transform:uppercase;letter-spacing:.03em;margin-bottom:14px}
+h1{font-size:28px;line-height:1.05;letter-spacing:-.045em;font-weight:500;margin:0 0 15px}
+p{font-size:12px;line-height:1.45;color:#777;margin:0 0 29px}
+.control-label{font-size:11px;margin-bottom:9px}
+.sizes{display:flex;flex-direction:column;gap:6px}
+.sizes button{border:1px solid #d6d6d4;padding:10px 12px;background:transparent;display:flex;justify-content:space-between;gap:20px;text-align:left;font-size:12px;cursor:pointer}
+.sizes button.selected{background:#181818;color:white;border-color:#181818}
+.sizes button:focus-visible,.direct:focus-visible{outline:2px solid #f7a0c8;outline-offset:3px}
+.sizes button .px{opacity:.58}
+.note{margin-top:26px}
+.direct{font-size:12px;text-decoration:underline;text-underline-offset:3px}
+.preview-area{min-height:100dvh;overflow:hidden;padding:35px 15px 20px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
+.preview-caption{font-size:11px;color:#999;margin:0 0 15px}
+.device-space{position:relative;flex:none}
+.phone{position:absolute;top:0;left:0;transform-origin:top left;padding:10px;border-radius:45px;background:#161616;box-shadow:0 14px 58px rgba(0,0,0,.14),0 0 0 1px #333}
+.phone:before{content:'';position:absolute;top:12px;left:50%;width:87px;height:22px;background:#161616;transform:translateX(-50%);border-radius:0 0 15px 15px;z-index:2;pointer-events:none}
+.phone iframe{display:block;border:0;border-radius:35px;background:#fff;overflow:hidden}
+@media(max-width:750px){
+ .shell{display:block}
+ .controls{position:static;padding:20px 18px}
+ .studio{margin-bottom:20px}
+ .controls h1{font-size:21px}
+ .sizes{flex-direction:row;flex-wrap:wrap}
+ .sizes button{min-width:140px}
+ .preview-area{min-height:auto;padding-top:8px}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="controls">
+<div class="studio">DISTINCT ARCHIVES</div>
+<div class="eyebrow">Website study / 11</div>
+<h1>Mobile<br>preview.</h1>
+<p>This loads the current Test 11 website inside a phone-sized viewport. Scroll, drag, tap and explore as you would on a phone.</p>
+<div class="control-label">Screen size</div>
+<div class="sizes" role="group" aria-label="Choose phone screen size">
+<button class="selected" type="button" data-w="393" data-h="852" aria-pressed="true">iPhone 14/15 Pro <span class="px">393 × 852</span></button>
+<button type="button" data-w="375" data-h="667" aria-pressed="false">iPhone SE <span class="px">375 × 667</span></button>
+<button type="button" data-w="430" data-h="932" aria-pressed="false">iPhone Pro Max <span class="px">430 × 932</span></button>
+<button type="button" data-w="360" data-h="800" aria-pressed="false">Android <span class="px">360 × 800</span></button>
+</div>
+<div class="note"><a class="direct" href="/home-test11/" target="_blank" rel="noopener">Open real homepage directly ↗</a></div>
+</aside>
+<main class="preview-area">
+<div class="preview-caption" id="preview-caption">Test 11 · 393 × 852</div>
+<div class="device-space" id="device-space">
+<div class="phone" id="phone">
+<iframe id="site" title="Distinct Archives mobile homepage" src="/home-test11/" loading="eager" width="393" height="852"></iframe>
+</div>
+</div>
+</main>
+</div>
+<script>
+(function(){
+const buttons=[...document.querySelectorAll('.sizes button')];
+const phone=document.getElementById('phone'), iframe=document.getElementById('site');
+const space=document.getElementById('device-space'),caption=document.getElementById('preview-caption');
+let selected=buttons[0];
+function resize(){
+ const w=Number(selected.dataset.w),h=Number(selected.dataset.h);
+ iframe.width=w;iframe.height=h;
+ phone.style.width=(w+20)+'px';phone.style.height=(h+20)+'px';
+ const area=document.querySelector('.preview-area');
+ const available=Math.max(260,area.clientWidth-20);
+ const scale=Math.min(1,available/(w+20),Math.max(320,window.innerHeight-115)/(h+20));
+ phone.style.transform='scale('+scale+')';
+ space.style.width=((w+20)*scale)+'px';space.style.height=((h+20)*scale)+'px';
+ caption.textContent='Test 11 · '+w+' × '+h;
+}
+buttons.forEach(button=>button.addEventListener('click',()=>{
+ selected=button;buttons.forEach(b=>{b.classList.toggle('selected',b===button);b.setAttribute('aria-pressed',String(b===button))});resize();
+}));
+window.addEventListener('resize',resize);
+resize();
+})();
+</script>
+</body>
+</html>
