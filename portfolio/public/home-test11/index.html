@@ -93,14 +93,43 @@ html,body{height:100%;overscroll-behavior:none}
 .marquee-home.overprinting .home-copy{z-index:6}
 .marquee-home .marquee-stage .marquee-item:is(:active,:focus-visible) .image-caption{color:var(--studio-pink)}
 
-/* Cinematic intro: left-aligned cursor and typing, then a move upward
-   into the original light homepage layout. */
+/* Editorial CRT startup, followed by the original left-aligned typewriter
+   and the transition to the white portfolio. The boot effect is visual only. */
 .intro-screen{display:none}
 html.intro-pending .intro-screen{
  display:block;position:fixed;inset:0;z-index:100;
  background-color:#111;color:#fff;
  transition:background-color 1.05s ease,color 1.05s ease
 }
+/* Phosphor line brightens, extends horizontally, and opens into a dim screen.
+   Avoid a full-white flash; the final canvas remains black until the reveal. */
+.intro-crt-boot{
+ position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;
+ background:#090b0b;animation:crt-boot-dismiss .25s ease 1.02s forwards;
+}
+.intro-crt-boot::before{
+ content:"";position:absolute;top:50%;left:50%;
+ width:0;height:2px;transform:translate(-50%,-50%);
+ background:rgba(244,255,250,.92);
+ box-shadow:0 0 12px rgba(255,255,255,.85),0 0 34px rgba(197,252,229,.32);
+ animation:crt-boot-beam 1.02s cubic-bezier(.26,0,.2,1) both;
+}
+.intro-crt-boot::after{
+ content:"";position:absolute;inset:0;
+ background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,rgba(185,218,208,.10) 4px);
+ opacity:0;animation:crt-boot-scanlines .8s ease .24s both;
+}
+@keyframes crt-boot-beam{
+ 0%{width:0;height:2px;opacity:0}
+ 10%{width:5vw;height:2px;opacity:1}
+ 46%{width:94vw;height:2px;opacity:1}
+ 65%{width:100vw;height:3px;opacity:.9}
+ 85%{width:100vw;height:84dvh;opacity:.16}
+ 100%{width:100vw;height:100dvh;opacity:0}
+}
+@keyframes crt-boot-dismiss{to{opacity:0;visibility:hidden}}
+@keyframes crt-boot-scanlines{0%{opacity:0}50%{opacity:.33}100%{opacity:0}}
+html.intro-pending:not(.intro-booted) .intro-screen-text{visibility:hidden}
 .intro-screen-text{
  position:absolute;top:50%;left:clamp(15px,2.1vw,37px);
  width:min(1600px,calc(100vw - 60px));
@@ -146,6 +175,7 @@ html.intro-pending .marquee-home .motion-toggle{
 }
 @media(max-width:500px){.intro-screen-text{font-size:18px}}
 @media(prefers-reduced-motion:reduce){
+ .intro-crt-boot,.intro-crt-boot::before,.intro-crt-boot::after{animation:none;display:none}
  .marquee-home .home-copy>.group,.marquee-home .marquee-stage,
  .marquee-home .marquee-hint,.intro-screen,.intro-screen-text{transition:none}
 }
@@ -181,6 +211,7 @@ html.intro-pending .marquee-home .motion-toggle{
 </head>
 <body>
 <div class="intro-screen" id="intro-screen" aria-hidden="true">
+ <span class="intro-crt-boot" aria-hidden="true"></span>
  <p class="intro-screen-text" id="intro-screen-text"><span id="intro-typed"></span><span class="intro-caret"></span></p>
 </div>
 <main id="home" class="home marquee-home">
@@ -435,13 +466,14 @@ html.intro-pending .marquee-home .motion-toggle{
   const skip=()=>{
    if(completed)return;
    completed=true;
-   root.classList.remove('intro-pending','intro-finishing');
+   root.classList.remove('intro-pending','intro-finishing','intro-booted');
    typed.textContent='';
   };
   if(!original||!target||!typed||!stageText||motionQuery.matches||location.hash){
    skip();return;
   }
   const chars=Array.from(original.textContent);
+  const bootMs=1280;
   const cursorOnlyMs=950;
   const typingMs=3250;
   const fullTextHoldMs=280;
@@ -461,11 +493,16 @@ html.intro-pending .marquee-home .motion-toggle{
    if(completed)return;
    if(start===null)start=now;
    const elapsed=now-start;
-   if(elapsed<cursorOnlyMs){
+   if(elapsed<bootMs){
     requestAnimationFrame(tick);
     return;
    }
-   const progress=Math.min(1,(elapsed-cursorOnlyMs)/typingMs);
+   if(!root.classList.contains('intro-booted'))root.classList.add('intro-booted');
+   if(elapsed<bootMs+cursorOnlyMs){
+    requestAnimationFrame(tick);
+    return;
+   }
+   const progress=Math.min(1,(elapsed-bootMs-cursorOnlyMs)/typingMs);
    const count=Math.min(chars.length,Math.floor(progress*chars.length));
    typed.textContent=chars.slice(0,count).join('');
    if(progress>=1){
