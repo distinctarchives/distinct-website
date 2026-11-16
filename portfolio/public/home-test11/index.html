@@ -93,27 +93,40 @@ html,body{height:100%;overscroll-behavior:none}
 .marquee-home.overprinting .home-copy{z-index:6}
 .marquee-home .marquee-stage .marquee-item:is(:active,:focus-visible) .image-caption{color:var(--studio-pink)}
 
-/* Opening sequence: only the intro types; all other content reveals afterward.
-   The invisible original text preserves line wrapping and layout height. */
-.marquee-home .intro{position:relative}
-.marquee-home .intro-typed{display:none}
-html.intro-pending .marquee-home .intro-original{opacity:0}
-html.intro-pending .marquee-home .intro-typed{
- display:block;position:absolute;top:0;left:0;width:100%;
- white-space:normal;pointer-events:none
+/* Cinematic intro: black stage, centered white typing, then a precisely
+   aligned flight to the final description position as colors reverse. */
+.intro-screen{display:none}
+html.intro-pending .intro-screen{
+ display:block;position:fixed;inset:0;z-index:100;
+ background-color:#111;color:#fff;
+ transition:background-color 1.05s ease,color 1.05s ease
 }
-html.intro-pending .marquee-home .intro-typed::after{
- content:"";display:inline-block;width:2px;height:.83em;margin-left:3px;
+.intro-screen-text{
+ position:absolute;top:50%;left:clamp(15px,2.1vw,37px);
+ width:min(1600px,calc(100vw - 60px));
+ transform:translateY(-50%);margin:0;
+ font-size:clamp(20px,1.65vw,25px);
+ line-height:1.16;letter-spacing:-.022em;font-weight:400;
+ transition:top 1.05s cubic-bezier(.76,0,.24,1),transform 1.05s cubic-bezier(.76,0,.24,1)
+}
+.intro-screen-text .intro-caret{
+ display:inline-block;width:2px;height:.84em;margin-left:3px;
  vertical-align:-.08em;background:currentColor;
  animation:intro-caret-blink .7s steps(1,end) infinite
 }
-@keyframes intro-caret-blink{0%,48%{opacity:1}49%,100%{opacity:0}}
+@keyframes intro-caret-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+html.intro-pending .marquee-home .intro-original{visibility:hidden}
+html.intro-finishing .intro-screen{background-color:#fff;color:#171717}
+html.intro-finishing .intro-screen-text{
+ top:var(--intro-final-top,24px);transform:translateY(0)
+}
+html.intro-finishing .intro-screen-text .intro-caret{
+ animation:none;opacity:0;transition:opacity .2s ease
+}
 .marquee-home .home-copy>.group{
  transition:opacity .64s ease,transform .64s cubic-bezier(.23,1,.32,1)
 }
-.marquee-home .marquee-stage{
- transition:opacity .85s ease,filter .24s ease
-}
+.marquee-home .marquee-stage{transition:opacity .85s ease,filter .24s ease}
 .marquee-home .marquee-hint{transition:opacity .7s ease}
 html.intro-pending .marquee-home .home-copy>.group{
  opacity:0;transform:translateY(10px);pointer-events:none
@@ -123,10 +136,14 @@ html.intro-pending .marquee-home .marquee-hint,
 html.intro-pending .marquee-home .motion-toggle{
  opacity:0;pointer-events:none
 }
+@media(max-width:800px){
+ .intro-screen-text{left:17px;width:calc(100% - 34px);
+  font-size:clamp(18px,2.6vw,21px)}
+}
+@media(max-width:500px){.intro-screen-text{font-size:18px}}
 @media(prefers-reduced-motion:reduce){
- .marquee-home .home-copy>.group,
- .marquee-home .marquee-stage,
- .marquee-home .marquee-hint{transition:none}
+ .marquee-home .home-copy>.group,.marquee-home .marquee-stage,
+ .marquee-home .marquee-hint,.intro-screen,.intro-screen-text{transition:none}
 }
 
 @media(max-width:800px){
@@ -159,9 +176,12 @@ html.intro-pending .marquee-home .motion-toggle{
 </style>
 </head>
 <body>
+<div class="intro-screen" id="intro-screen" aria-hidden="true">
+ <p class="intro-screen-text" id="intro-screen-text"><span id="intro-typed"></span><span class="intro-caret"></span></p>
+</div>
 <main id="home" class="home marquee-home">
  <div class="home-copy">
-  <p class="intro"><span class="intro-original">Distinct Archives is an independent design practice working across visual identities, art direction, editorial design and digital experiences. The practice develops visual systems for people, places and ideas.</span><span class="intro-typed" aria-hidden="true" id="intro-typed"></span></p>
+  <p class="intro"><span class="intro-original">Distinct Archives is an independent design practice working across visual identities, art direction, editorial design and digital experiences. The practice develops visual systems for people, places and ideas.</span></p>
   <div class="group">
    <div>Selected work</div>
    <nav class="stack" id="work-links" aria-label="Selected projects"></nav>
@@ -396,39 +416,64 @@ html.intro-pending .marquee-home .motion-toggle{
   }
  });
 
- // Intro writes into a separate visual layer while the full text holds layout space.
- // Start the reel and reveal navigation only after the text has finished typing.
+ // Cinematic opening for both desktop and mobile, skipped for reduced motion
+ // and direct project/overlay links. The normal paragraph remains in the DOM
+ // for accessibility and determines the exact final landing position.
  (function runIntro(){
-  if(!document.documentElement.classList.contains('intro-pending'))return;
+  const root=document.documentElement;
+  if(!root.classList.contains('intro-pending'))return;
   const original=document.querySelector('.marquee-home .intro-original');
+  const target=document.querySelector('.marquee-home .intro');
   const typed=document.getElementById('intro-typed');
-  if(!original||!typed){document.documentElement.classList.remove('intro-pending');return;}
-  const chars=Array.from(original.textContent);
-  const duration=3800;
-  const introDelay=180;
-  let start=null,completed=false;
-  function finish(){
+  const stageText=document.getElementById('intro-screen-text');
+  const motionQuery=window.matchMedia('(prefers-reduced-motion: reduce)');
+  let completed=false;
+  const skip=()=>{
    if(completed)return;
    completed=true;
+   root.classList.remove('intro-pending','intro-finishing');
+   typed.textContent='';
+  };
+  if(!original||!target||!typed||!stageText||motionQuery.matches||location.hash){
+   skip();return;
+  }
+  const chars=Array.from(original.textContent);
+  const cursorOnlyMs=950;
+  const typingMs=3250;
+  const fullTextHoldMs=280;
+  const transitionMs=1050;
+  let start=null;
+  function moveToLayout(){
+   if(completed)return;
+   const rect=target.getBoundingClientRect();
+   stageText.style.setProperty('--intro-final-top',rect.top+'px');
+   stageText.style.left=rect.left+'px';
+   stageText.style.width=rect.width+'px';
    typed.textContent=original.textContent;
-   setTimeout(()=>{
-    document.documentElement.classList.remove('intro-pending');
-    typed.textContent='';
-   },420);
+   root.classList.add('intro-finishing');
+   setTimeout(skip,transitionMs+80);
   }
   function tick(now){
    if(completed)return;
-   if(start===null)start=now+introDelay;
-   const elapsed=Math.max(0,now-start);
-   const count=Math.min(chars.length,Math.floor(elapsed/duration*chars.length));
+   if(start===null)start=now;
+   const elapsed=now-start;
+   if(elapsed<cursorOnlyMs){
+    requestAnimationFrame(tick);
+    return;
+   }
+   const progress=Math.min(1,(elapsed-cursorOnlyMs)/typingMs);
+   const count=Math.min(chars.length,Math.floor(progress*chars.length));
    typed.textContent=chars.slice(0,count).join('');
-   if(count>=chars.length){finish();return;}
+   if(progress>=1){
+    setTimeout(moveToLayout,fullTextHoldMs);
+    return;
+   }
    requestAnimationFrame(tick);
   }
-  const motionQuery=window.matchMedia('(prefers-reduced-motion: reduce)');
-  if(motionQuery.matches){finish();return;}
-  const disable=e=>{if(e.matches)finish();};
-  if(motionQuery.addEventListener)motionQuery.addEventListener('change',disable,{once:true});
+  if(motionQuery.addEventListener)motionQuery.addEventListener('change',e=>{if(e.matches)skip()},{once:true});
+  window.addEventListener('popstate',skip,{once:true});
+  window.addEventListener('hashchange',skip,{once:true});
+  window.addEventListener('pagehide',skip,{once:true});
   requestAnimationFrame(tick);
  })();
 })();
