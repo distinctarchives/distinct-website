@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="icon" type="image/svg+xml" sizes="any" href="/favicon.svg">
+<link rel="icon" type="image/svg+xml" sizes="any" href="/favicon.svg?v=2">
 <meta name="theme-color" content="#ffffff">
 <meta name="description" content="Distinct Archives — independent design practice, selected work and visual archive.">
 <title>Distinct Archives — Selected Work</title>
@@ -87,6 +87,33 @@ html,body{height:100%;overscroll-behavior:none}
 .marquee-home #home-image{display:none}
 .marquee-home .home-overprint{z-index:9}
 .marquee-home .overprint-close{display:none!important}
+/* About portrait: wide editorial text plus a quiet photographic column. */
+.marquee-home .about-panel{
+ display:grid;grid-template-columns:minmax(0,1.45fr) minmax(220px,.65fr);
+ gap:clamp(24px,4vw,76px);align-items:start;width:100%
+}
+.marquee-home .about-panel .about-copy{
+ min-width:0;font-size:clamp(32px,4.2vw,72px);
+ line-height:1.035;letter-spacing:-.048em
+}
+.marquee-home .about-panel .about-copy h2{margin-bottom:.68em}
+.marquee-home .about-panel .about-photo{
+ margin:0;width:100%;max-width:440px;justify-self:end;position:sticky;top:0
+}
+.marquee-home .about-panel .about-photo img{
+ display:block;width:100%;height:auto;aspect-ratio:1;object-fit:contain
+}
+@media(max-width:800px){
+ .marquee-home .about-panel{grid-template-columns:1fr;gap:25px}
+ .marquee-home .about-panel .about-copy{font-size:clamp(29px,6.2vw,46px)}
+ .marquee-home .about-panel .about-photo{
+  position:static;width:min(78vw,360px);justify-self:center
+ }
+}
+@media(max-width:500px){
+ .marquee-home .about-panel .about-copy{font-size:clamp(27px,7vw,35px)}
+}
+
 .marquee-home.overprinting .marquee-stage{opacity:.1;filter:grayscale(1);transition:opacity .24s ease;pointer-events:none}
 .marquee-home.overprinting .marquee-hint,
 .marquee-home.overprinting .marquee-index{color:#d0d0d0}
@@ -430,7 +457,7 @@ html.intro-pending .marquee-home .motion-toggle{
   const target=e.target;
   if(!(target instanceof Element))return;
   if(target.closest('[data-go="about"],[data-go="contact"]'))return;
-  if(target.closest('#overprint-inner h2,#overprint-inner p,#overprint-inner a'))return;
+  if(target.closest('#overprint-inner h2,#overprint-inner p,#overprint-inner a,#overprint-inner .about-photo'))return;
   // Consume the background click so it does not also open an underlying project.
   e.preventDefault();
   e.stopImmediatePropagation();
