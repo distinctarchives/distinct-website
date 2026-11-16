@@ -27,7 +27,10 @@ const DATA={"projects":[{"slug":"wna","title":"Woodstock New Age","tagline":"Sha
 if(k==='about'||k==='contact'){
  lastFocus=document.activeElement;
  overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');
- const about=`<h2>About</h2><p>Distinct Archives is an independent design practice working across visual identities, art direction, editorial design and digital experiences.</p><p>The practice develops visual systems for people, places and ideas.</p>`;
+ const aboutText=`<h2>About</h2><p>Distinct Archives is an independent design practice working across visual identities, art direction, editorial design and digital experiences.</p><p>The practice develops visual systems for people, places and ideas.</p>`;
+ const about=home.classList.contains('marquee-home')
+  ?`<div class="about-panel"><div class="about-copy">${aboutText}</div><figure class="about-photo"><img src="/about-portrait.svg" alt="Black-and-white portrait of the designer" width="480" height="480" loading="eager" decoding="async"></figure></div>`
+  :aboutText;
  const contact=`<h2>Contact</h2><p>For projects, collaborations and enquiries.</p><p><a href="mailto:distinct.archives@gmail.com">distinct.archives@gmail.com</a></p>`;
  overprintInner.innerHTML=(k==='about'?about:contact)+`<button type="button" class="overprint-close" id="overprint-close">Close</button>`;
  home.classList.add('overprinting');overprint.classList.add('visible');overprint.setAttribute('aria-hidden','false');
