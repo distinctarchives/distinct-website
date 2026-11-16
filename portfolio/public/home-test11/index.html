@@ -9,6 +9,11 @@
 <title>Distinct Archives — Moving Archive / Test 11</title>
 <base href="/">
 <link rel="stylesheet" href="/style.css">
+<script>
+if(!location.hash && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+ document.documentElement.classList.add('intro-pending');
+}
+</script>
 <style>
 /* Test 11 — editorial moving archive. This is intentionally isolated from the live homepage. */
 :root{--studio-pink:#f7a0c8}
@@ -87,6 +92,43 @@ html,body{height:100%;overscroll-behavior:none}
 .marquee-home.overprinting .marquee-index{color:#d0d0d0}
 .marquee-home.overprinting .home-copy{z-index:6}
 .marquee-home .marquee-stage .marquee-item:is(:active,:focus-visible) .image-caption{color:var(--studio-pink)}
+
+/* Opening sequence: only the intro types; all other content reveals afterward.
+   The invisible original text preserves line wrapping and layout height. */
+.marquee-home .intro{position:relative}
+.marquee-home .intro-typed{display:none}
+html.intro-pending .marquee-home .intro-original{opacity:0}
+html.intro-pending .marquee-home .intro-typed{
+ display:block;position:absolute;top:0;left:0;width:100%;
+ white-space:normal;pointer-events:none
+}
+html.intro-pending .marquee-home .intro-typed::after{
+ content:"";display:inline-block;width:2px;height:.83em;margin-left:3px;
+ vertical-align:-.08em;background:currentColor;
+ animation:intro-caret-blink .7s steps(1,end) infinite
+}
+@keyframes intro-caret-blink{0%,48%{opacity:1}49%,100%{opacity:0}}
+.marquee-home .home-copy>.group{
+ transition:opacity .64s ease,transform .64s cubic-bezier(.23,1,.32,1)
+}
+.marquee-home .marquee-stage{
+ transition:opacity .85s ease,filter .24s ease
+}
+.marquee-home .marquee-hint{transition:opacity .7s ease}
+html.intro-pending .marquee-home .home-copy>.group{
+ opacity:0;transform:translateY(10px);pointer-events:none
+}
+html.intro-pending .marquee-home .marquee-stage,
+html.intro-pending .marquee-home .marquee-hint,
+html.intro-pending .marquee-home .motion-toggle{
+ opacity:0;pointer-events:none
+}
+@media(prefers-reduced-motion:reduce){
+ .marquee-home .home-copy>.group,
+ .marquee-home .marquee-stage,
+ .marquee-home .marquee-hint{transition:none}
+}
+
 @media(max-width:800px){
  .marquee-home .home-copy{top:17px;left:17px;width:calc(100% - 34px);font-size:12px}
  .marquee-home .home-copy .intro{max-width:100%;font-size:clamp(18px,2.6vw,21px)}
@@ -119,7 +161,7 @@ html,body{height:100%;overscroll-behavior:none}
 <body>
 <main id="home" class="home marquee-home">
  <div class="home-copy">
-  <p class="intro">Distinct Archives is an independent design practice working across visual identities, art direction, editorial design and digital experiences. The practice develops visual systems for people, places and ideas.</p>
+  <p class="intro"><span class="intro-original">Distinct Archives is an independent design practice working across visual identities, art direction, editorial design and digital experiences. The practice develops visual systems for people, places and ideas.</span><span class="intro-typed" aria-hidden="true" id="intro-typed"></span></p>
   <div class="group">
    <div>Selected work</div>
    <nav class="stack" id="work-links" aria-label="Selected projects"></nav>
@@ -195,7 +237,7 @@ html,body{height:100%;overscroll-behavior:none}
  window.addEventListener('load',refreshWidth,{once:true});
  window.addEventListener('resize',refreshWidth);
 
- const blocked=()=>home.classList.contains('overprinting')||overlay.classList.contains('open');
+ const blocked=()=>document.documentElement.classList.contains('intro-pending')||home.classList.contains('overprinting')||overlay.classList.contains('open');
  const updateToggle=()=>{
   toggle.textContent=paused?'Play motion':'Pause motion';
   toggle.setAttribute('aria-pressed',String(!paused));
@@ -353,6 +395,42 @@ html,body{height:100%;overscroll-behavior:none}
    if(imageButton)imageButton.click();
   }
  });
+
+ // Intro writes into a separate visual layer while the full text holds layout space.
+ // Start the reel and reveal navigation only after the text has finished typing.
+ (function runIntro(){
+  if(!document.documentElement.classList.contains('intro-pending'))return;
+  const original=document.querySelector('.marquee-home .intro-original');
+  const typed=document.getElementById('intro-typed');
+  if(!original||!typed){document.documentElement.classList.remove('intro-pending');return;}
+  const chars=Array.from(original.textContent);
+  const duration=3800;
+  const introDelay=180;
+  let start=null,completed=false;
+  function finish(){
+   if(completed)return;
+   completed=true;
+   typed.textContent=original.textContent;
+   setTimeout(()=>{
+    document.documentElement.classList.remove('intro-pending');
+    typed.textContent='';
+   },420);
+  }
+  function tick(now){
+   if(completed)return;
+   if(start===null)start=now+introDelay;
+   const elapsed=Math.max(0,now-start);
+   const count=Math.min(chars.length,Math.floor(elapsed/duration*chars.length));
+   typed.textContent=chars.slice(0,count).join('');
+   if(count>=chars.length){finish();return;}
+   requestAnimationFrame(tick);
+  }
+  const motionQuery=window.matchMedia('(prefers-reduced-motion: reduce)');
+  if(motionQuery.matches){finish();return;}
+  const disable=e=>{if(e.matches)finish();};
+  if(motionQuery.addEventListener)motionQuery.addEventListener('change',disable,{once:true});
+  requestAnimationFrame(tick);
+ })();
 })();
 </script>
 </body>
