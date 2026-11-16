@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/svg+xml" sizes="any" href="/favicon.svg">
-<meta name="theme-color" content="#111111">
+<meta name="theme-color" content="#ffffff">
 <meta name="description" content="Distinct Archives — moving visual archive homepage study.">
 <title>Distinct Archives — Moving Archive / Test 11</title>
 <base href="/">
@@ -17,8 +17,8 @@ if(!location.hash && !window.matchMedia('(prefers-reduced-motion: reduce)').matc
 <style>
 /* Test 11 — editorial moving archive. This is intentionally isolated from the live homepage. */
 :root{--studio-pink:#f7a0c8}
-html,body{height:100%;overscroll-behavior:none;background:#111;color:#f4f4f4}
-#home.marquee-home{position:fixed;inset:0;width:100%;height:100dvh;min-height:0;background:#111;color:#f4f4f4;overflow:hidden}
+html,body{height:100%;overscroll-behavior:none}
+#home.marquee-home{position:fixed;inset:0;width:100%;height:100dvh;min-height:0;background:#fff;overflow:hidden}
 .marquee-home .home-copy{
   position:absolute;z-index:6;top:clamp(18px,3vh,32px);left:clamp(15px,2.1vw,37px);
   width:min(1700px,calc(100vw - 60px));transform:none;font-size:clamp(11px,.91vw,13px);
@@ -70,7 +70,7 @@ html,body{height:100%;overscroll-behavior:none;background:#111;color:#f4f4f4}
 .marquee-home .marquee-item .image-caption{
  position:absolute;left:0;bottom:-24px;max-width:100%;
  font-size:11px;letter-spacing:-.01em;white-space:nowrap;
- color:#f4f4f4;background:#111;padding:3px 5px 3px 0;
+ color:#1b1b1b;background:#fff;padding:3px 5px 3px 0;
  opacity:0;transform:translateY(3px);transition:opacity .15s ease,transform .15s ease
 }
 .marquee-home .marquee-item:hover .image-caption,
@@ -87,21 +87,14 @@ html,body{height:100%;overscroll-behavior:none;background:#111;color:#f4f4f4}
 .marquee-home #home-image{display:none}
 .marquee-home .home-overprint{z-index:9}
 .marquee-home .overprint-close{display:none!important}
-.marquee-home .overprint-inner{color:#f4f4f4}
-.marquee-home.overprinting .home-copy,
-.marquee-home.overprinting .home-copy button{color:#777}
-.marquee-home.overprinting .home-copy button.is-current{color:var(--studio-pink)}
-#home.marquee-home .motion-toggle{background:#111;color:#f4f4f4;border-color:#777}
-/* Keep existing white project/archive detail overlays readable in the dark homepage theme. */
-#overlay{color:#171717}
 .marquee-home.overprinting .marquee-stage{opacity:.1;filter:grayscale(1);transition:opacity .24s ease;pointer-events:none}
 .marquee-home.overprinting .marquee-hint,
 .marquee-home.overprinting .marquee-index{color:#d0d0d0}
 .marquee-home.overprinting .home-copy{z-index:6}
 .marquee-home .marquee-stage .marquee-item:is(:active,:focus-visible) .image-caption{color:var(--studio-pink)}
 
-/* Cinematic intro: a free-standing central cursor, followed by white typing
-   on a black stage that remains black when the homepage is revealed. */
+/* Cinematic intro: central cursor, centered white typing, then a
+   move to the final description position and return to a light homepage. */
 .intro-screen{display:none}
 html.intro-pending .intro-screen{
  display:block;position:fixed;inset:0;z-index:100;
@@ -109,40 +102,36 @@ html.intro-pending .intro-screen{
  transition:background-color 1.05s ease,color 1.05s ease
 }
 .intro-screen-text{
- position:absolute;top:50%;left:clamp(15px,2.1vw,37px);
+ position:absolute;top:50%;left:50%;
  width:min(1600px,calc(100vw - 60px));
- transform:translateY(-50%);margin:0;
+ transform:translate(-50%,-50%);margin:0;text-align:center;
  font-size:clamp(20px,1.65vw,25px);
  line-height:1.16;letter-spacing:-.022em;font-weight:400;
  transition:top 1.05s cubic-bezier(.76,0,.24,1),
-            transform .52s cubic-bezier(.76,0,.24,1),
-            left .52s cubic-bezier(.76,0,.24,1),
-            width .52s cubic-bezier(.76,0,.24,1)
+            transform 1.05s cubic-bezier(.76,0,.24,1),
+            left 1.05s cubic-bezier(.76,0,.24,1),
+            width 1.05s cubic-bezier(.76,0,.24,1)
 }
-/* The initial cursor is its own precisely centered element, not part of
-   the paragraph's layout or transform. */
+/* Free-standing caret is exactly centered during the opening pause. */
 .intro-center-cursor{display:none}
 html.intro-pending.intro-cursor-center .intro-center-cursor{
  display:block;position:fixed;top:50%;left:50%;
- width:3px;height:27px;transform:translate(-50%,-50%);
+ width:3px;height:25px;transform:translate(-50%,-50%);
  background:#fff;z-index:102;
  animation:intro-caret-blink .72s steps(1,end) infinite
 }
-html.intro-pending.intro-cursor-center .intro-screen-text{visibility:hidden}
+html.intro-cursor-center .intro-screen-text{visibility:hidden}
 .intro-screen-text .intro-caret{
  display:inline-block;width:2px;height:.84em;margin-left:3px;
  vertical-align:-.08em;background:currentColor;
  animation:intro-caret-blink .7s steps(1,end) infinite
 }
-@keyframes intro-caret-blink{0%,60%{opacity:1}61%,100%{opacity:0}}
+@keyframes intro-caret-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
 html.intro-pending .marquee-home .intro-original{visibility:hidden}
-html.intro-finishing .intro-screen{background-color:#111;color:#fff}
+html.intro-finishing .intro-screen{background-color:#fff;color:#171717}
 html.intro-finishing .intro-screen-text{
- top:var(--intro-final-top,24px);transform:translateY(0);
- transition:top 1.05s cubic-bezier(.76,0,.24,1),
-            transform 1.05s cubic-bezier(.76,0,.24,1),
-            left .52s cubic-bezier(.76,0,.24,1),
-            width .52s cubic-bezier(.76,0,.24,1)
+ top:var(--intro-final-top,24px);transform:translate(0,0);
+ text-align:left
 }
 html.intro-finishing .intro-screen-text .intro-caret{
  animation:none;opacity:0;transition:opacity .2s ease
@@ -161,7 +150,7 @@ html.intro-pending .marquee-home .motion-toggle{
  opacity:0;pointer-events:none
 }
 @media(max-width:800px){
- .intro-screen-text{left:17px;width:calc(100% - 34px);
+ .intro-screen-text{width:calc(100% - 34px);
   font-size:clamp(18px,2.6vw,21px)}
 }
 @media(max-width:500px){.intro-screen-text{font-size:18px}}
@@ -463,12 +452,11 @@ html.intro-pending .marquee-home .motion-toggle{
    skip();return;
   }
   const chars=Array.from(original.textContent);
-  const cursorOnlyMs=1600;
-  const repositionMs=520;
+  const cursorOnlyMs=950;
   const typingMs=3250;
   const fullTextHoldMs=280;
   const transitionMs=1050;
-  let start=null,moved=false;
+  let start=null;
   function moveToLayout(){
    if(completed)return;
    const rect=target.getBoundingClientRect();
@@ -487,12 +475,8 @@ html.intro-pending .marquee-home .motion-toggle{
     requestAnimationFrame(tick);
     return;
    }
-   if(!moved){moved=true;root.classList.remove('intro-cursor-center');}
-   if(elapsed<cursorOnlyMs+repositionMs){
-    requestAnimationFrame(tick);
-    return;
-   }
-   const progress=Math.min(1,(elapsed-cursorOnlyMs-repositionMs)/typingMs);
+   if(root.classList.contains('intro-cursor-center'))root.classList.remove('intro-cursor-center');
+   const progress=Math.min(1,(elapsed-cursorOnlyMs)/typingMs);
    const count=Math.min(chars.length,Math.floor(progress*chars.length));
    typed.textContent=chars.slice(0,count).join('');
    if(progress>=1){
