@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/style.css">
 <script>
 if(!location.hash && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
- document.documentElement.classList.add('intro-pending','intro-cursor-center');
+ document.documentElement.classList.add('intro-pending');
 }
 </script>
 <style>
@@ -93,8 +93,8 @@ html,body{height:100%;overscroll-behavior:none}
 .marquee-home.overprinting .home-copy{z-index:6}
 .marquee-home .marquee-stage .marquee-item:is(:active,:focus-visible) .image-caption{color:var(--studio-pink)}
 
-/* Cinematic intro: central cursor, centered white typing, then a
-   move to the final description position and return to a light homepage. */
+/* Cinematic intro: left-aligned cursor and typing, then a move upward
+   into the original light homepage layout. */
 .intro-screen{display:none}
 html.intro-pending .intro-screen{
  display:block;position:fixed;inset:0;z-index:100;
@@ -102,9 +102,9 @@ html.intro-pending .intro-screen{
  transition:background-color 1.05s ease,color 1.05s ease
 }
 .intro-screen-text{
- position:absolute;top:50%;left:50%;
+ position:absolute;top:50%;left:clamp(15px,2.1vw,37px);
  width:min(1600px,calc(100vw - 60px));
- transform:translate(-50%,-50%);margin:0;text-align:center;
+ transform:translateY(-50%);margin:0;text-align:left;
  font-size:clamp(20px,1.65vw,25px);
  line-height:1.16;letter-spacing:-.022em;font-weight:400;
  transition:top 1.05s cubic-bezier(.76,0,.24,1),
@@ -112,15 +112,6 @@ html.intro-pending .intro-screen{
             left 1.05s cubic-bezier(.76,0,.24,1),
             width 1.05s cubic-bezier(.76,0,.24,1)
 }
-/* Free-standing caret is exactly centered during the opening pause. */
-.intro-center-cursor{display:none}
-html.intro-pending.intro-cursor-center .intro-center-cursor{
- display:block;position:fixed;top:50%;left:50%;
- width:3px;height:25px;transform:translate(-50%,-50%);
- background:#fff;z-index:102;
- animation:intro-caret-blink .72s steps(1,end) infinite
-}
-html.intro-cursor-center .intro-screen-text{visibility:hidden}
 .intro-screen-text .intro-caret{
  display:inline-block;width:2px;height:.84em;margin-left:3px;
  vertical-align:-.08em;background:currentColor;
@@ -130,7 +121,7 @@ html.intro-cursor-center .intro-screen-text{visibility:hidden}
 html.intro-pending .marquee-home .intro-original{visibility:hidden}
 html.intro-finishing .intro-screen{background-color:#fff;color:#171717}
 html.intro-finishing .intro-screen-text{
- top:var(--intro-final-top,24px);transform:translate(0,0);
+ top:var(--intro-final-top,24px);transform:translateY(0);
  text-align:left
 }
 html.intro-finishing .intro-screen-text .intro-caret{
@@ -150,7 +141,7 @@ html.intro-pending .marquee-home .motion-toggle{
  opacity:0;pointer-events:none
 }
 @media(max-width:800px){
- .intro-screen-text{width:calc(100% - 34px);
+ .intro-screen-text{left:17px;width:calc(100% - 34px);
   font-size:clamp(18px,2.6vw,21px)}
 }
 @media(max-width:500px){.intro-screen-text{font-size:18px}}
@@ -190,7 +181,6 @@ html.intro-pending .marquee-home .motion-toggle{
 </head>
 <body>
 <div class="intro-screen" id="intro-screen" aria-hidden="true">
- <span class="intro-center-cursor" aria-hidden="true"></span>
  <p class="intro-screen-text" id="intro-screen-text"><span id="intro-typed"></span><span class="intro-caret"></span></p>
 </div>
 <main id="home" class="home marquee-home">
@@ -445,7 +435,7 @@ html.intro-pending .marquee-home .motion-toggle{
   const skip=()=>{
    if(completed)return;
    completed=true;
-   root.classList.remove('intro-pending','intro-finishing','intro-cursor-center');
+   root.classList.remove('intro-pending','intro-finishing');
    typed.textContent='';
   };
   if(!original||!target||!typed||!stageText||motionQuery.matches||location.hash){
@@ -475,7 +465,6 @@ html.intro-pending .marquee-home .motion-toggle{
     requestAnimationFrame(tick);
     return;
    }
-   if(root.classList.contains('intro-cursor-center'))root.classList.remove('intro-cursor-center');
    const progress=Math.min(1,(elapsed-cursorOnlyMs)/typingMs);
    const count=Math.min(chars.length,Math.floor(progress*chars.length));
    typed.textContent=chars.slice(0,count).join('');
