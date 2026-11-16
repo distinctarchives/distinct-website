@@ -91,7 +91,9 @@ html,body{height:100%;overscroll-behavior:none;background:#111;color:#f4f4f4}
 .marquee-home.overprinting .home-copy,
 .marquee-home.overprinting .home-copy button{color:#777}
 .marquee-home.overprinting .home-copy button.is-current{color:var(--studio-pink)}
-.marquee-home .motion-toggle{background:#111;color:#f4f4f4;border-color:#777}
+#home.marquee-home .motion-toggle{background:#111;color:#f4f4f4;border-color:#777}
+/* Keep existing white project/archive detail overlays readable in the dark homepage theme. */
+#overlay{color:#171717}
 .marquee-home.overprinting .marquee-stage{opacity:.1;filter:grayscale(1);transition:opacity .24s ease;pointer-events:none}
 .marquee-home.overprinting .marquee-hint,
 .marquee-home.overprinting .marquee-index{color:#d0d0d0}
