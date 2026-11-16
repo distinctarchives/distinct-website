@@ -81,6 +81,7 @@ html,body{height:100%;overscroll-behavior:none}
 }
 .marquee-home #home-image{display:none}
 .marquee-home .home-overprint{z-index:9}
+.marquee-home .overprint-close{display:none!important}
 .marquee-home.overprinting .marquee-stage{opacity:.1;filter:grayscale(1);transition:opacity .24s ease;pointer-events:none}
 .marquee-home.overprinting .marquee-hint,
 .marquee-home.overprinting .marquee-index{color:#d0d0d0}
@@ -324,6 +325,20 @@ html,body{height:100%;overscroll-behavior:none}
   for(const t of e.changedTouches){if(t.identifier===gesture.id){endGesture();break;}}
  },{passive:true});
  viewport.addEventListener('touchcancel',()=>endGesture(),{passive:true});
+
+ // Editorial About/Contact panels dismiss when tapping or clicking outside the text.
+ // Keep the navigation usable for switching between the two panels.
+ document.addEventListener('click',e=>{
+  if(!home.classList.contains('overprinting'))return;
+  const target=e.target;
+  if(!(target instanceof Element))return;
+  if(target.closest('[data-go="about"],[data-go="contact"]'))return;
+  if(target.closest('#overprint-inner h2,#overprint-inner p,#overprint-inner a'))return;
+  // Consume the background click so it does not also open an underlying project.
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  close();
+ },true);
 
  track.addEventListener('click',e=>{
   const button=e.target.closest('button.marquee-item');
