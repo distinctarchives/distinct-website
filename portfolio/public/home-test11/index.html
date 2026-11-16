@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/style.css">
 <script>
 if(!location.hash && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
- document.documentElement.classList.add('intro-pending');
+ document.documentElement.classList.add('intro-pending','intro-cursor-center');
 }
 </script>
 <style>
@@ -107,7 +107,13 @@ html.intro-pending .intro-screen{
  transform:translateY(-50%);margin:0;
  font-size:clamp(20px,1.65vw,25px);
  line-height:1.16;letter-spacing:-.022em;font-weight:400;
- transition:top 1.05s cubic-bezier(.76,0,.24,1),transform 1.05s cubic-bezier(.76,0,.24,1)
+ transition:top 1.05s cubic-bezier(.76,0,.24,1),
+            transform .52s cubic-bezier(.76,0,.24,1),
+            left .52s cubic-bezier(.76,0,.24,1),
+            width .52s cubic-bezier(.76,0,.24,1)
+}
+html.intro-cursor-center .intro-screen-text{
+ left:50%;width:0;transform:translate(-50%,-50%);white-space:nowrap
 }
 .intro-screen-text .intro-caret{
  display:inline-block;width:2px;height:.84em;margin-left:3px;
@@ -118,7 +124,11 @@ html.intro-pending .intro-screen{
 html.intro-pending .marquee-home .intro-original{visibility:hidden}
 html.intro-finishing .intro-screen{background-color:#fff;color:#171717}
 html.intro-finishing .intro-screen-text{
- top:var(--intro-final-top,24px);transform:translateY(0)
+ top:var(--intro-final-top,24px);transform:translateY(0);
+ transition:top 1.05s cubic-bezier(.76,0,.24,1),
+            transform 1.05s cubic-bezier(.76,0,.24,1),
+            left .52s cubic-bezier(.76,0,.24,1),
+            width .52s cubic-bezier(.76,0,.24,1)
 }
 html.intro-finishing .intro-screen-text .intro-caret{
  animation:none;opacity:0;transition:opacity .2s ease
@@ -431,7 +441,7 @@ html.intro-pending .marquee-home .motion-toggle{
   const skip=()=>{
    if(completed)return;
    completed=true;
-   root.classList.remove('intro-pending','intro-finishing');
+   root.classList.remove('intro-pending','intro-finishing','intro-cursor-center');
    typed.textContent='';
   };
   if(!original||!target||!typed||!stageText||motionQuery.matches||location.hash){
@@ -439,10 +449,11 @@ html.intro-pending .marquee-home .motion-toggle{
   }
   const chars=Array.from(original.textContent);
   const cursorOnlyMs=950;
+  const repositionMs=520;
   const typingMs=3250;
   const fullTextHoldMs=280;
   const transitionMs=1050;
-  let start=null;
+  let start=null,moved=false;
   function moveToLayout(){
    if(completed)return;
    const rect=target.getBoundingClientRect();
@@ -461,7 +472,12 @@ html.intro-pending .marquee-home .motion-toggle{
     requestAnimationFrame(tick);
     return;
    }
-   const progress=Math.min(1,(elapsed-cursorOnlyMs)/typingMs);
+   if(!moved){moved=true;root.classList.remove('intro-cursor-center');}
+   if(elapsed<cursorOnlyMs+repositionMs){
+    requestAnimationFrame(tick);
+    return;
+   }
+   const progress=Math.min(1,(elapsed-cursorOnlyMs-repositionMs)/typingMs);
    const count=Math.min(chars.length,Math.floor(progress*chars.length));
    typed.textContent=chars.slice(0,count).join('');
    if(progress>=1){
