@@ -237,9 +237,10 @@ html.intro-pending .marquee-home .motion-toggle{
  .marquee-home .marquee-item{transition:none}
 }
 
-/* Test 12 — dense, full-bleed printed-image stack.
-   Compressed spacing and restrained shadows retain the continuous motion
-   without artificial white framing. Official homepage is unchanged. */
+/* Test 12 — reference-matched 3D print archive:
+   a dense long diagonal stack, large visible print faces up front,
+   receding toward the upper-right with no artificial white borders.
+   Original editorial text and official homepage remain unchanged. */
 .spatial-home .spatial-stage{
  top:27%;height:69dvh;display:block;z-index:2;
  pointer-events:none;overflow:visible
@@ -264,9 +265,9 @@ html.intro-pending .marquee-home .motion-toggle{
  background:transparent;color:#171717;overflow:visible;
  transform-origin:center;transform-style:preserve-3d;
  backface-visibility:hidden;will-change:transform,opacity;
- box-shadow:1px 1px 0 rgba(15,15,15,.24),
-            2px 3px 3px rgba(15,15,15,.12),
-            8px 12px 20px rgba(15,15,15,.12);
+ box-shadow:1px 1px 0 rgba(15,15,15,.22),
+            3px 4px 6px rgba(15,15,15,.13),
+            10px 15px 24px rgba(15,15,15,.11);
  pointer-events:auto;cursor:pointer
 }
 .spatial-home .spatial-card img{
@@ -276,9 +277,9 @@ html.intro-pending .marquee-home .motion-toggle{
 }
 .spatial-home .spatial-card:hover,
 .spatial-home .spatial-card:focus-visible{
- box-shadow:1px 1px 0 rgba(15,15,15,.28),
-            5px 7px 10px rgba(15,15,15,.17),
-            17px 22px 30px rgba(15,15,15,.18)
+ box-shadow:1px 1px 0 rgba(15,15,15,.27),
+            6px 8px 12px rgba(15,15,15,.17),
+            18px 26px 34px rgba(15,15,15,.15)
 }
 .spatial-home .spatial-card:focus-visible{
  outline:3px solid #f7a0c8;outline-offset:4px
@@ -381,7 +382,7 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
  }
  // A single row; all other rack groups have been removed.
  const rack=document.getElementById('spatial-rack-0');
- const cards=Array.from({length:28},(_,i)=>{
+ const cards=Array.from({length:52},(_,i)=>{
   const item=imagePool[(i*9)%imagePool.length];
   const card=document.createElement('button');
   card.className='spatial-card';card.type='button';
@@ -391,7 +392,7 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
   const img=document.createElement('img');
   img.src=encodeURI(item.src);
   img.alt=item.alt;img.draggable=false;
-  img.loading=i<12?'eager':'lazy';img.decoding='async';
+  img.loading=i<10?'eager':'lazy';img.decoding='async';
   const caption=document.createElement('span');
   caption.className='spatial-caption';
   caption.textContent=item.label+' ↗';
@@ -427,18 +428,21 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
   const w=viewport.clientWidth,h=viewport.clientHeight;
   if(!w||!h)return;
   const mobile=w<600,tablet=w>=600&&w<950;
-  const cw=mobile?Math.min(103,w*.27):tablet?126:Math.min(151,w*.095);
-  const ch=Math.round(cw*1.29);
+  // The mockup has a near-square foreground print and a long physical
+  // deck receding from the lower-left to the upper-right. Keep the
+  // paper edges dense, while expanding the full diagonal silhouette.
+  const cw=mobile?Math.min(127,w*.34):tablet?Math.min(174,w*.22):Math.min(250,w*.15);
+  const ch=Math.round(cw*(mobile?1.12:1.07));
   geometry={
-   w,h,visible:mobile?16:tablet?19:24,
-   x0:w*(mobile?.20:tablet?.23:.21),
-   y0:h*(mobile?.77:tablet?.78:.77),
-   // Tight overlap: images are the exposed print surface, not framed cards.
-   dx:w*(mobile?.031:tablet?.025:.021),
-   dy:h*(mobile?.020:tablet?.017:.014),
-   dz:mobile?4:tablet?5:6,
-   angle:mobile?-24:-27,
-   skew:mobile?15:17
+   w,h,visible:mobile?18:tablet?30:40,
+   x0:w*(mobile?.32:tablet?.30:.315),
+   y0:h*(mobile?.72:tablet?.73:.72),
+   // Compress the card-to-card gaps without flattening the diagonal.
+   dx:w*(mobile?.025:tablet?.0175:.014),
+   dy:h*(mobile?.026:tablet?.021:.019),
+   dz:mobile?10:tablet?12:13,
+   angle:mobile?-28:-32,
+   skew:mobile?18:22
   };
   cards.forEach(card=>{
    card.style.setProperty('--card-width',cw+'px');
@@ -468,10 +472,10 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
    const opacity=Math.min(fadeIn,fadeOut);
    const x=x0+k*dx-w*.5;
    const y=y0-k*dy-h*.5;
-   const z=55-k*dz;
+   const z=120-k*dz;
    card.style.transform='translate3d('+
     x.toFixed(2)+'px,'+y.toFixed(2)+'px,'+z.toFixed(2)+
-    'px) rotateY('+angle+'deg) skewY('+skew+'deg) rotateX(3deg)';
+    'px) rotateY('+angle+'deg) skewY('+skew+'deg) rotateX(5deg)';
    card.style.opacity=opacity.toFixed(3);
    const rank=Math.round(600-k*12);
    const zIndex=card===activeCard?900:rank;
