@@ -237,25 +237,18 @@ html.intro-pending .marquee-home .motion-toggle{
  .marquee-home .marquee-item{transition:none}
 }
 
-/* Test 12: an oblique-angle archive viewed from above and slightly to the
-   side. Poster faces stay broad and readable while their paper edges
-   stack tightly into the upper-right distance, like the reference. */
+/* Test 12 — two stacks along a continuous diagonal, with one poster
+   separating from the archive as it travels between them.
+   This is an experiment; the published homepage is untouched. */
 .spatial-home .spatial-stage{
- top:32%;height:65dvh;display:block;z-index:2;
+ top:27%;height:69dvh;display:block;z-index:2;
  pointer-events:none;overflow:visible
 }
 .spatial-home .spatial-window{
- position:absolute;inset:0;overflow:hidden;pointer-events:auto;
- perspective:1350px;perspective-origin:47% 40%;
+ position:absolute;inset:0;overflow:visible;pointer-events:auto;
+ perspective:1450px;perspective-origin:50% 44%;
  transform-style:preserve-3d;touch-action:none;
- cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none
-}
-.spatial-home .spatial-window::before{
- content:"";position:absolute;left:18%;top:52%;
- width:80%;height:42%;pointer-events:none;
- background:radial-gradient(ellipse at center,rgba(0,0,0,.12),transparent 66%);
- filter:blur(32px);transform:rotate(-13deg);
- opacity:.8
+ user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab
 }
 .spatial-home .spatial-window.dragging,
 .spatial-home .spatial-window.dragging *{cursor:grabbing!important}
@@ -264,36 +257,50 @@ html.intro-pending .marquee-home .motion-toggle{
 }
 .spatial-home .spatial-card{
  display:block;position:absolute;top:50%;left:50%;
- width:var(--card-width,250px);height:var(--card-height,205px);
- margin-left:calc(var(--card-width,250px)*-.5);
- margin-top:calc(var(--card-height,205px)*-.5);
- padding:5px;border:1px solid #dededb;border-radius:0;
- background:#fbfbf9;color:#171717;overflow:visible;
- transform-origin:center center;
- backface-visibility:hidden;transform-style:preserve-3d;
- box-shadow:3px 1px 0 #ededeb,6px 3px 0 #c8c8c5,
-            10px 12px 19px rgba(14,14,14,.15),
-            21px 25px 38px rgba(14,14,14,.17);
- will-change:transform,opacity;pointer-events:auto;cursor:pointer;
+ width:var(--card-width,150px);height:var(--card-height,190px);
+ margin-left:calc(var(--card-width,150px)*-.5);
+ margin-top:calc(var(--card-height,190px)*-.5);
+ padding:4px;border:1px solid #dededb;border-radius:0;
+ background:#fafaf8;color:#171717;overflow:visible;
+ transform-origin:center;transform-style:preserve-3d;
+ backface-visibility:hidden;will-change:transform,opacity;
+ box-shadow:
+   2px 1px 0 #efefed,
+   4px 3px 0 #bdbdba,
+   8px 10px 16px rgba(15,15,15,.13),
+   16px 23px 24px rgba(15,15,15,.11);
+ pointer-events:auto;cursor:pointer
 }
 .spatial-home .spatial-card::after{
  content:"";position:absolute;z-index:-1;
- top:3px;bottom:-4px;right:-5px;width:4px;
- background:linear-gradient(to right,#cfcfcb,#f9f9f5 55%,#b5b5b1);
- border-right:1px solid #a4a4a0;pointer-events:none
+ right:-5px;top:3px;bottom:-4px;width:4px;
+ background:linear-gradient(90deg,#c0c0bc,#f1f1ee 60%,#aaaaa7);
+ border-right:1px solid #aaa9a6;pointer-events:none
 }
 .spatial-home .spatial-card img{
  display:block;width:100%;height:100%;object-fit:cover;
  user-select:none;-webkit-user-select:none;-webkit-user-drag:none;
  backface-visibility:hidden;pointer-events:none
 }
+.spatial-home .spatial-card.is-featured{
+ padding:6px;background:#fcfcfa;border-color:#d9d9d5;
+ box-shadow:
+   3px 2px 0 #e4e4e0,
+   7px 5px 0 #b9b9b5,
+   15px 20px 27px rgba(15,15,15,.17),
+   28px 34px 45px rgba(15,15,15,.13)
+}
 .spatial-home .spatial-card:hover,
 .spatial-home .spatial-card:focus-visible{
- box-shadow:3px 1px 0 #f5f5f2,7px 4px 0 #bababa,
-            18px 22px 28px rgba(0,0,0,.2),
-            32px 36px 50px rgba(0,0,0,.17)
+ box-shadow:
+   3px 2px 0 #ededeb,
+   8px 5px 0 #b9b9b5,
+   17px 23px 31px rgba(15,15,15,.19),
+   29px 37px 47px rgba(15,15,15,.13)
 }
-.spatial-home .spatial-card:focus-visible{outline:3px solid #f7a0c8;outline-offset:5px}
+.spatial-home .spatial-card:focus-visible{
+ outline:3px solid #f7a0c8;outline-offset:4px
+}
 .spatial-home .spatial-card .spatial-caption{
  position:absolute;left:-1px;bottom:-26px;white-space:nowrap;
  background:#fff;color:#171717;font-size:10px;line-height:1.15;
@@ -305,15 +312,14 @@ html.intro-pending .marquee-home .motion-toggle{
 .spatial-home #home-image{display:none}
 .spatial-home .marquee-hint{z-index:6}
 .spatial-home.overprinting .spatial-stage{pointer-events:none}
+html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
 @media(max-width:900px){
- .spatial-home .spatial-stage{top:41%;height:55dvh}
+ .spatial-home .spatial-stage{top:43%;height:53dvh}
+ .spatial-home .spatial-window{perspective:1150px}
 }
 @media(max-width:500px){
- .spatial-home .spatial-stage{top:49%;height:47dvh}
- .spatial-home .spatial-window{perspective:960px;perspective-origin:49% 38%}
- .spatial-home .spatial-window::before{
-  width:93%;left:4%;top:58%;height:34%;filter:blur(19px)
- }
+ .spatial-home .spatial-stage{top:51%;height:44dvh}
+ .spatial-home .spatial-window{perspective:840px;perspective-origin:50% 43%}
 }
 @media(prefers-reduced-motion:reduce){
  .spatial-home .spatial-card{transition:none}
@@ -430,49 +436,85 @@ html.intro-pending .marquee-home .motion-toggle{
  if(prefersReduced.addEventListener)prefersReduced.addEventListener('change',e=>{
   paused=e.matches;velocity=0;updateToggle();
  });
+ // A continuous cycle: each print approaches from the top-right stack,
+ // becomes the isolated feature in the central gap, then joins the lower-left
+ // stack. Positions are bounded to the viewport so no posters get cut off.
+ const lerp=(a,b,t)=>a+(b-a)*t;
+ const smooth=t=>{t=clamp(t,0,1);return t*t*(3-2*t)};
+ const blend=(a,b,t)=>({
+  x:lerp(a.x,b.x,t),y:lerp(a.y,b.y,t),z:lerp(a.z,b.z,t),
+  angle:lerp(a.angle,b.angle,t),shear:lerp(a.shear,b.shear,t),
+  w:lerp(a.w,b.w,t),h:lerp(a.h,b.h,t)
+ });
  function layout(){
   const w=viewport.clientWidth,h=viewport.clientHeight;
   if(!w||!h)return;
-  const mobile=w<600,tablet=w>=600&&w<900;
-  // Horizontal, shallow-angled poster faces, as in the reference:
-  // their top/bottom edges slope down-right while the stack runs up-right.
-  const cw=mobile?166:tablet?208:257;
-  const ch=mobile?139:tablet?170:208;
+  const mobile=w<600,tablet=w>=600&&w<950;
+  const cw=mobile?88:tablet?123:Math.min(174,w*.106);
+  const ch=mobile?118:tablet?158:Math.min(215,h*.355);
+  const heroW=cw*(mobile?1.48:1.43);
+  const heroH=ch*(mobile?1.40:1.39);
+  const xStep=w*(mobile?.038:tablet?.026:.0225);
+  const yStep=h*(mobile?.022:tablet?.020:.019);
+  const right={
+   x:w*(mobile?.675:tablet?.66:.66),y:h*(mobile?.35:.32),
+   z:20,angle:-21,shear:17,w:cw,h:ch
+  };
+  const left={
+   x:w*(mobile?.34:tablet?.35:.35),y:h*(mobile?.635:.62),
+   z:19,angle:-21,shear:17,w:cw,h:ch
+  };
+  const center={
+   x:w*.5,y:h*(mobile?.48:.48),
+   z:160,angle:-10,shear:15,w:heroW,h:heroH
+  };
+  const visible=mobile?7:tablet?9:11;
   const count=cards.length;
-  const visibleEnd=mobile?16:tablet?24:30;
-  const frontX=w*(mobile?.30:tablet?.41:.465);
-  const frontY=h*(mobile?.65:tablet?.55:.49);
-  const dx=mobile?15:tablet?20:23.5;
-  const dy=mobile?5.8:tablet?7.7:9.2;
-  const depth=mobile?12:tablet?15:17;
-  const baseAngle=mobile?-28:-31;
-  const faceShear=mobile?17:21;
   const cycle=((phase%count)+count)%count;
   cards.forEach((card,i)=>{
-   const k=(i-cycle+count)%count;
-   if(k>=visibleEnd+1){
-    card.style.visibility='hidden';
-    card.style.pointerEvents='none';return;
+   const k=((i-cycle+count*1.5)%count)-count*.5;
+   if(k>visible+.5||k<-(visible+.5)){
+    card.style.visibility='hidden';card.style.pointerEvents='none';
+    card.classList.remove('is-featured');
+    return;
    }
-   card.style.visibility='visible';
-   // Fade the front print as it leaves; reveal the next poster underneath it.
-   const frontFade=clamp(k/.64,0,1);
-   const backFade=clamp((visibleEnd-k)/2,0,1);
-   const opacity=Math.min(frontFade,backFade);
-   const isHovered=card===activeCard&&opacity>.35;
-   const pull=clamp(1-k/1.4,0,1);
-   const x=frontX+k*dx-10*pull-(isHovered?14:0)-w*.5;
-   const y=frontY-k*dy+8*pull-(isHovered?18:0)-h*.5;
-   const z=115-k*depth+38*pull+(isHovered?90:0);
-   const angle=baseAngle+5*pull+(isHovered?15:0);
-   card.style.setProperty('--card-width',cw+'px');
-   card.style.setProperty('--card-height',ch+'px');
+   let p,opacity=1;
+   if(k>=.42){
+    const d=Math.max(0,k-1);
+    p={...right,x:right.x+d*xStep,y:right.y-d*yStep,
+       z:right.z-d*5};
+    opacity=Math.min(1,clamp((visible+.6-k)/1.4,0,1));
+   }else if(k>=.04){
+    p=blend(right,center,smooth((.42-k)/.38));
+   }else if(k>=-.20){
+    p=center;
+   }else if(k>=-.64){
+    p=blend(center,left,smooth((-.20-k)/.44));
+   }else{
+    const d=Math.max(0,-k-1);
+    p={...left,x:left.x-d*xStep,y:left.y+d*yStep,
+       z:left.z-d*5};
+    opacity=Math.min(1,clamp((visible+.6+k)/1.4,0,1));
+   }
+   const pop=(k<.22&&k>-.43);
+   const isHovered=card===activeCard&&opacity>.4;
+   if(isHovered){
+    p={...p,z:p.z+62,y:p.y-14,
+       angle:p.angle+9,shear:p.shear-4};
+   }
+   // Avoid huge shadow/overlap changes at the stream boundary.
+   card.classList.toggle('is-featured',pop);
+   card.style.setProperty('--card-width',p.w.toFixed(2)+'px');
+   card.style.setProperty('--card-height',p.h.toFixed(2)+'px');
    card.style.opacity=opacity.toFixed(3);
-   card.style.pointerEvents=opacity>.3?'auto':'none';
-   card.style.zIndex=String(isHovered?1000:Math.floor(400-k*10));
-   card.style.transform='translate3d('+x.toFixed(1)+'px,'+
-    y.toFixed(1)+'px,'+z.toFixed(1)+'px) rotateY('+
-    angle.toFixed(1)+'deg) skewY('+faceShear+'deg) rotateX(2deg)';
+   card.style.visibility='visible';
+   card.style.pointerEvents=opacity>.25?'auto':'none';
+   card.style.zIndex=String(isHovered?1000:pop?900:
+      Math.floor(550-Math.abs(k)*18));
+   card.style.transform='translate3d('+
+      (p.x-w*.5).toFixed(2)+'px,'+(p.y-h*.5).toFixed(2)+'px,'+
+      p.z.toFixed(2)+'px) rotateY('+p.angle.toFixed(2)+
+      'deg) skewY('+p.shear.toFixed(2)+'deg) rotateX(1deg)';
   });
  }
  function tick(now){
