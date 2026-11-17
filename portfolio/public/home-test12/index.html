@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" type="image/x-icon" sizes="16x16 32x32" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" media="(prefers-color-scheme: light)" href="/favicon-light-32.png">
+<link rel="icon" type="image/png" sizes="32x32" media="(prefers-color-scheme: dark)" href="/favicon-dark-32.png">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Distinct Archives — an experimental spatial portfolio and visual archive.">
+<title>Distinct Archives — Spatial Archive / Test 12</title>
+<base href="/">
+<link rel="stylesheet" href="/style.css">
+<script>
+if(!location.hash && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+ document.documentElement.classList.add('intro-pending');
+}
+</script>
+<style>
+/* Test 12 — interactive 3D spatial archive study. Official homepage is unchanged. */
+:root{--studio-pink:#f7a0c8}
+html,body{height:100%;overscroll-behavior:none}
+#home.marquee-home{position:fixed;inset:0;width:100%;height:100dvh;min-height:0;background:#fff;overflow:hidden}
+.marquee-home .home-copy{
+  position:absolute;z-index:6;top:clamp(18px,3vh,32px);left:clamp(15px,2.1vw,37px);
+  width:min(1700px,calc(100vw - 60px));transform:none;font-size:clamp(11px,.91vw,13px);
+  line-height:1.18;letter-spacing:-.01em
+}
+.marquee-home .home-copy .intro{
+ margin:0 0 16px;max-width:1600px;
+ font-size:clamp(20px,1.65vw,25px);line-height:1.16;letter-spacing:-.022em
+}
+.marquee-home .home-copy .group{margin-top:12px}
+.marquee-home .home-copy .group p{margin:0}
+.marquee-home #work-links{display:flex;flex-direction:column;align-items:flex-start}
+.marquee-home #work-links button{white-space:normal;line-height:1.14}
+.marquee-home .marquee-stage{
+ position:absolute;left:0;right:0;top:45.5%;height:min(46vh,410px);
+ z-index:2;display:flex;align-items:center;pointer-events:none;
+}
+.marquee-home .marquee-viewport{
+ position:relative;overflow:hidden;width:100%;height:100%;
+ pointer-events:auto;display:flex;align-items:center;
+ touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;
+}
+.marquee-home .marquee-track{
+ display:flex;align-items:center;width:max-content;flex:none;
+ animation:none;will-change:transform;transform:translate3d(0,0,0)
+}
+.marquee-home .marquee-viewport.is-dragging,
+.marquee-home .marquee-viewport.is-dragging *{cursor:grabbing!important}
+.marquee-home .marquee-viewport.is-dragging .marquee-item{transition:none}
+.marquee-home .marquee-viewport img{
+ user-select:none;-webkit-user-select:none;-webkit-user-drag:none
+}
+.marquee-home .marquee-set{display:flex;align-items:center;flex:none;width:max-content;padding:18px 0 37px}
+.marquee-home .marquee-item{
+ --y:0px;
+ display:block;flex:none;position:relative;z-index:1;
+ border:0;background:transparent;padding:0;margin:0 0 0 -20px;
+ width:var(--w,190px);height:var(--h,230px);
+ transform:translateY(var(--y)) rotate(var(--rot,0deg));
+ cursor:pointer;transition:transform .26s ease,filter .2s ease;
+}
+.marquee-home .marquee-item:first-child{margin-left:0}
+.marquee-home .marquee-item img{display:block;width:100%;height:100%;object-fit:cover}
+.marquee-home .marquee-item:hover,.marquee-home .marquee-item:focus-visible{
+ z-index:40;transform:translateY(var(--y)) scale(1.065) rotate(0deg);
+ filter:saturate(1.04)
+}
+.marquee-home .marquee-item:focus-visible{outline:2px solid var(--studio-pink);outline-offset:4px}
+.marquee-home .marquee-item .image-caption{
+ position:absolute;left:0;bottom:-24px;max-width:100%;
+ font-size:11px;letter-spacing:-.01em;white-space:nowrap;
+ color:#1b1b1b;background:#fff;padding:3px 5px 3px 0;
+ opacity:0;transform:translateY(3px);transition:opacity .15s ease,transform .15s ease
+}
+.marquee-home .marquee-item:hover .image-caption,
+.marquee-home .marquee-item:focus-visible .image-caption{opacity:1;transform:none}
+.marquee-home .marquee-item .image-caption span{color:var(--studio-pink)}
+.marquee-home .marquee-index{
+ position:absolute;z-index:4;bottom:clamp(17px,3vh,38px);left:clamp(15px,2.1vw,37px);
+ font-size:clamp(10px,.8vw,12px);line-height:1.16;letter-spacing:-.012em;color:#999;
+}
+.marquee-home .marquee-hint{
+ position:absolute;z-index:4;bottom:clamp(17px,3vh,38px);right:clamp(15px,2.1vw,37px);
+ font-size:clamp(10px,.8vw,12px);line-height:1.16;letter-spacing:-.012em;color:#999;text-align:right;
+}
+.marquee-home #home-image{display:none}
+.marquee-home .home-overprint{z-index:9}
+.marquee-home .overprint-close{display:none!important}
+/* About portrait: wide editorial text plus a quiet photographic column. */
+.marquee-home .about-panel{
+ display:grid;grid-template-columns:minmax(0,1.45fr) minmax(220px,.65fr);
+ gap:clamp(24px,4vw,76px);align-items:start;width:100%
+}
+.marquee-home .about-panel .about-copy{
+ min-width:0;font-size:clamp(32px,4.2vw,72px);
+ line-height:1.035;letter-spacing:-.048em
+}
+.marquee-home .about-panel .about-copy h2{margin-bottom:.68em}
+.marquee-home .about-panel .about-photo{
+ margin:0;width:100%;max-width:440px;justify-self:end;position:sticky;top:0
+}
+.marquee-home .about-panel .about-photo img{
+ display:block;width:100%;height:auto;aspect-ratio:1;object-fit:contain
+}
+@media(max-width:800px){
+ .marquee-home .about-panel{grid-template-columns:1fr;gap:25px}
+ .marquee-home .about-panel .about-copy{font-size:clamp(29px,6.2vw,46px)}
+ .marquee-home .about-panel .about-photo{
+  position:static;width:min(78vw,360px);justify-self:center
+ }
+}
+@media(max-width:500px){
+ .marquee-home .about-panel .about-copy{font-size:clamp(27px,7vw,35px)}
+}
+
+.marquee-home.overprinting .marquee-stage{opacity:.1;filter:grayscale(1);transition:opacity .24s ease;pointer-events:none}
+.marquee-home.overprinting .marquee-hint,
+.marquee-home.overprinting .marquee-index{color:#d0d0d0}
+.marquee-home.overprinting .home-copy{z-index:6}
+.marquee-home .marquee-stage .marquee-item:is(:active,:focus-visible) .image-caption{color:var(--studio-pink)}
+
+/* Editorial CRT startup, followed by the original left-aligned typewriter
+   and the transition to the white portfolio. The boot effect is visual only. */
+.intro-screen{display:none}
+html.intro-pending .intro-screen{
+ display:block;position:fixed;inset:0;z-index:100;
+ background-color:#111;color:#fff;
+ transition:background-color 1.05s ease,color 1.05s ease
+}
+/* Phosphor line brightens, extends horizontally, and opens into a dim screen.
+   Avoid a full-white flash; the final canvas remains black until the reveal. */
+.intro-crt-boot{
+ position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;
+ background:#090b0b;animation:crt-boot-dismiss .25s ease 1.02s forwards;
+}
+.intro-crt-boot::before{
+ content:"";position:absolute;top:50%;left:50%;
+ width:0;height:2px;transform:translate(-50%,-50%);
+ background:rgba(244,255,250,.92);
+ box-shadow:0 0 12px rgba(255,255,255,.85),0 0 34px rgba(197,252,229,.32);
+ animation:crt-boot-beam 1.02s cubic-bezier(.26,0,.2,1) both;
+}
+.intro-crt-boot::after{
+ content:"";position:absolute;inset:0;
+ background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,rgba(185,218,208,.10) 4px);
+ opacity:0;animation:crt-boot-scanlines .8s ease .24s both;
+}
+@keyframes crt-boot-beam{
+ 0%{width:0;height:2px;opacity:0}
+ 10%{width:5vw;height:2px;opacity:1}
+ 46%{width:94vw;height:2px;opacity:1}
+ 65%{width:100vw;height:3px;opacity:.9}
+ 85%{width:100vw;height:84dvh;opacity:.16}
+ 100%{width:100vw;height:100dvh;opacity:0}
+}
+@keyframes crt-boot-dismiss{to{opacity:0;visibility:hidden}}
+@keyframes crt-boot-scanlines{0%{opacity:0}50%{opacity:.33}100%{opacity:0}}
+html.intro-pending:not(.intro-booted) .intro-screen-text{visibility:hidden}
+.intro-screen-text{
+ position:absolute;top:50%;left:clamp(15px,2.1vw,37px);
+ width:min(1600px,calc(100vw - 60px));
+ transform:translateY(-50%);margin:0;text-align:left;
+ font-size:clamp(20px,1.65vw,25px);
+ line-height:1.16;letter-spacing:-.022em;font-weight:400;
+ transition:top 1.05s cubic-bezier(.76,0,.24,1),
+            transform 1.05s cubic-bezier(.76,0,.24,1),
+            left 1.05s cubic-bezier(.76,0,.24,1),
+            width 1.05s cubic-bezier(.76,0,.24,1)
+}
+.intro-screen-text .intro-caret{
+ display:inline-block;width:2px;height:.84em;margin-left:3px;
+ vertical-align:-.08em;background:currentColor;
+ animation:intro-caret-blink .7s steps(1,end) infinite
+}
+@keyframes intro-caret-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+html.intro-pending .marquee-home .intro-original{visibility:hidden}
+html.intro-finishing .intro-screen{background-color:#fff;color:#171717}
+html.intro-finishing .intro-screen-text{
+ top:var(--intro-final-top,24px);transform:translateY(0);
+ text-align:left
+}
+html.intro-finishing .intro-screen-text .intro-caret{
+ animation:none;opacity:0;transition:opacity .2s ease
+}
+.marquee-home .home-copy>.group{
+ transition:opacity .64s ease,transform .64s cubic-bezier(.23,1,.32,1)
+}
+.marquee-home .marquee-stage{transition:opacity .85s ease,filter .24s ease}
+.marquee-home .marquee-hint{transition:opacity .7s ease}
+html.intro-pending .marquee-home .home-copy>.group{
+ opacity:0;transform:translateY(10px);pointer-events:none
+}
+html.intro-pending .marquee-home .marquee-stage,
+html.intro-pending .marquee-home .marquee-hint,
+html.intro-pending .marquee-home .motion-toggle{
+ opacity:0;pointer-events:none
+}
+@media(max-width:800px){
+ .intro-screen-text{left:17px;width:calc(100% - 34px);
+  font-size:clamp(18px,2.6vw,21px)}
+}
+@media(max-width:500px){.intro-screen-text{font-size:18px}}
+@media(prefers-reduced-motion:reduce){
+ .intro-crt-boot,.intro-crt-boot::before,.intro-crt-boot::after{animation:none;display:none}
+ .marquee-home .home-copy>.group,.marquee-home .marquee-stage,
+ .marquee-home .marquee-hint,.intro-screen,.intro-screen-text{transition:none}
+}
+
+@media(max-width:800px){
+ .marquee-home .home-copy{top:17px;left:17px;width:calc(100% - 34px);font-size:12px}
+ .marquee-home .home-copy .intro{max-width:100%;font-size:clamp(18px,2.6vw,21px)}
+ .marquee-home .marquee-stage{top:43%;height:46vh}
+ .marquee-home .marquee-item{width:calc(var(--w,190px)*.78);height:calc(var(--h,230px)*.78);margin-left:-15px}
+ .marquee-home .marquee-hint{right:17px}
+ .marquee-home .marquee-index{left:17px}
+ .marquee-home .home-overprint{top:25%;left:17px;right:17px;max-height:69%}
+ .marquee-home .overprint-inner{font-size:clamp(32px,8vw,58px)}
+}
+@media(max-width:500px){
+ .marquee-home .home-copy .intro{max-width:100%;font-size:18px}
+ .marquee-home .marquee-stage{top:48%;height:39vh}
+ .marquee-home .marquee-item{width:calc(var(--w,190px)*.65);height:calc(var(--h,230px)*.65);margin-left:-13px}
+ .marquee-home .marquee-hint{max-width:47%}
+ .marquee-home .marquee-viewport{-webkit-mask-image:none;mask-image:none}
+}
+.marquee-home .motion-toggle{
+ position:absolute;z-index:5;bottom:clamp(17px,3vh,38px);left:50%;
+ transform:translateX(-50%);display:none;border:1px solid #c9c9c9;
+ border-radius:0;background:#fff;padding:5px 9px;cursor:pointer;
+ font-size:11px;line-height:1.15;color:#141414
+}
+@media(prefers-reduced-motion:reduce){
+ .marquee-home .motion-toggle{display:inline-block}
+ .marquee-home .marquee-item{transition:none}
+}
+
+/* Spatial 3D study — only the image presentation changes.
+   The intro, project navigation, About and Contact remain intact. */
+.spatial-home .spatial-stage{
+ top:38%;height:57dvh;display:block;z-index:2;pointer-events:none;
+ overflow:visible
+}
+.spatial-home .spatial-window{
+ position:absolute;inset:0;overflow:hidden;pointer-events:auto;
+ perspective:1200px;perspective-origin:50% 46%;
+ transform-style:preserve-3d;touch-action:none;
+ cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none
+}
+.spatial-home .spatial-window.dragging,
+.spatial-home .spatial-window.dragging *{cursor:grabbing!important}
+.spatial-home .spatial-rack{
+ position:absolute;inset:0;transform-style:preserve-3d;pointer-events:none
+}
+.spatial-home .spatial-card{
+ display:block;position:absolute;top:50%;left:50%;
+ width:var(--card-width,180px);height:var(--card-height,220px);
+ margin-left:calc(var(--card-width,180px)*-.5);
+ margin-top:calc(var(--card-height,220px)*-.5);
+ padding:0;border:1px solid rgba(20,20,20,.055);
+ border-radius:0;background:#f0f0ed;color:#171717;
+ box-shadow:0 8px 20px rgba(0,0,0,.09);
+ overflow:visible;transform-style:preserve-3d;
+ backface-visibility:hidden;will-change:transform,opacity;
+ pointer-events:auto;cursor:pointer;
+}
+.spatial-home .spatial-card img{
+ display:block;width:100%;height:100%;object-fit:cover;
+ user-select:none;-webkit-user-select:none;-webkit-user-drag:none;
+ backface-visibility:hidden;pointer-events:none;
+}
+.spatial-home .spatial-card:focus-visible{outline:3px solid #f7a0c8;outline-offset:3px}
+.spatial-home .spatial-card .spatial-caption{
+ position:absolute;left:-1px;bottom:-26px;white-space:nowrap;
+ background:#fff;color:#171717;font-size:10px;line-height:1.15;
+ padding:4px 6px;border:1px solid #e8e8e8;
+ letter-spacing:0;opacity:0;
+ transition:opacity .15s ease
+}
+.spatial-home .spatial-card:hover .spatial-caption,
+.spatial-home .spatial-card:focus-visible .spatial-caption{opacity:1}
+.spatial-home #home-image{
+ display:block;position:absolute;z-index:4;
+ width:min(22vw,280px);height:min(28vh,240px);
+ aspect-ratio:auto;left:51%;top:72%;bottom:auto;
+ transform:translate(-50%,-50%) rotateY(-13deg) rotateZ(1deg);
+ transform-origin:center;box-shadow:0 18px 38px rgba(0,0,0,.16);
+ border:1px solid #ececec;overflow:hidden;
+ transition:opacity .8s ease,transform .35s ease,filter .25s ease;
+}
+.spatial-home #home-image img{object-fit:cover}
+.spatial-home #home-image:hover,
+.spatial-home #home-image:focus-visible{
+ transform:translate(-50%,-54%) rotateY(0deg) rotateZ(0deg) scale(1.04)
+}
+html.intro-pending .spatial-home #home-image{
+ opacity:0;visibility:hidden;pointer-events:none
+}
+.spatial-home .marquee-hint{z-index:6}
+.spatial-home.overprinting .spatial-stage,
+.spatial-home.overprinting #home-image{pointer-events:none}
+@media(max-width:800px){
+ .spatial-home .spatial-stage{top:47%;height:47dvh}
+ .spatial-home #home-image{
+  left:51%;top:74%;width:min(28vw,195px);height:min(22vh,180px)
+ }
+}
+@media(max-width:500px){
+ .spatial-home .spatial-stage{top:51%;height:42dvh}
+ .spatial-home .spatial-window{perspective:850px}
+ .spatial-home #home-image{
+  left:50%;top:75%;width:min(33vw,140px);height:min(19vh,145px)
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .spatial-home #home-image,.spatial-home .spatial-card{transition:none}
+}
+
+</style>
+</head>
+<body>
+<div class="intro-screen" id="intro-screen" aria-hidden="true">
+ <span class="intro-crt-boot" aria-hidden="true"></span>
+ <p class="intro-screen-text" id="intro-screen-text"><span id="intro-typed"></span><span class="intro-caret"></span></p>
+</div>
+<main id="home" class="home marquee-home spatial-home">
+ <div class="home-copy">
+  <p class="intro"><span class="intro-original">Distinct Archives is an independent design practice working across visual identities, art direction, editorial design and digital experiences. The practice develops visual systems for people, places and ideas.</span></p>
+  <div class="group">
+   <div>Selected work</div>
+   <nav class="stack" id="work-links" aria-label="Selected projects"></nav>
+  </div>
+  <div class="group">
+   <div>Practice</div>
+   <button class="plain" data-go="about" type="button">About</button>
+   <button class="plain" data-go="contact" type="button">Contact</button>
+   <button class="plain" data-go="archive" type="button">Visual archive</button>
+  </div>
+  <div class="group"><p>Distinct Archives<br>Independent brand design practice</p></div>
+ </div>
+
+ <div class="marquee-stage spatial-stage">
+  <div class="spatial-window" id="spatial-window" aria-label="Three-dimensional collection of projects and visual archive images. Drag or scroll to explore.">
+   <div class="spatial-rack" id="spatial-rack-0"></div>
+   <div class="spatial-rack" id="spatial-rack-1"></div>
+   <div class="spatial-rack" id="spatial-rack-2"></div>
+  </div>
+ </div>
+ <div class="marquee-hint">Swipe or scroll to spin<br>Tap an image to explore</div>
+ <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Play motion</button>
+ <button id="home-image" class="home-image" type="button" aria-label="Open featured project" tabindex="-1"><img src="/Distinct_Framer_Media/naif/Thumbnail-Image.png" alt=""></button>
+ <section class="home-overprint" id="home-overprint" aria-hidden="true" aria-live="polite"><div class="overprint-inner" id="overprint-inner"></div></section>
+</main>
+<section class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="Portfolio content" aria-hidden="true">
+ <div class="overlay-top"><button class="plain top-identity" id="back-home" type="button">Distinct Archives</button><button class="plain" id="close" type="button">Close</button></div>
+ <div id="overlay-body"></div>
+</section>
+<script src="/app.js"></script>
+<script>
+(function(){
+
+ const home=document.getElementById('home');
+ const overlay=document.getElementById('overlay');
+ const viewport=document.getElementById('spatial-window');
+ const toggle=document.getElementById('motion-toggle');
+ const prefersReduced=matchMedia('(prefers-reduced-motion: reduce)');
+ const finePointer=matchMedia('(hover: hover) and (pointer: fine)');
+ const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+ const blocked=()=>document.documentElement.classList.contains('intro-pending')||
+  home.classList.contains('overprinting')||overlay.classList.contains('open');
+ const imagePool=[];
+ DATA.projects.forEach(p=>{
+  p.media.filter(m=>m.kind==='image').slice(0,5).forEach(m=>imagePool.push({
+   src:'/'+m.src,alt:p.title+' — project image',label:p.title,
+   project:p.slug
+  }));
+ });
+ DATA.archive.forEach((a,i)=>imagePool.push({
+  src:'/'+a.src,alt:'Visual archive '+a.title,label:'Archive / '+a.title,
+  archive:i
+ }));
+ const banks=[0,19,39].map(seed=>Array.from({length:16},(_,i)=>
+  imagePool[(seed+i*7)%imagePool.length]));
+ const tracks=banks.map((bank,lane)=>{
+  const group=document.getElementById('spatial-rack-'+lane);
+  return bank.map((item,i)=>{
+   const card=document.createElement('button');
+   card.className='spatial-card';
+   card.type='button';
+   card.setAttribute('aria-label','Open '+item.label);
+   if(item.project)card.dataset.project=item.project;
+   else card.dataset.archive=String(item.archive);
+   const img=document.createElement('img');
+   img.src=encodeURI(item.src);
+   img.alt=item.alt;img.draggable=false;
+   img.loading=(i<6?'eager':'lazy');
+   img.decoding='async';
+   const caption=document.createElement('span');
+   caption.className='spatial-caption';
+   caption.textContent=item.label+' ↗';
+   card.append(img,caption);group.append(card);
+   return card;
+  });
+ });
+ let phase=0,velocity=0,gesture=null,ignoreClickUntil=0,hovered=false;
+ let paused=prefersReduced.matches,lastTime=performance.now();
+ const updateToggle=()=>{
+  toggle.textContent=paused?'Play motion':'Pause motion';
+  toggle.setAttribute('aria-pressed',String(!paused));
+  home.classList.toggle('motion-enabled',!paused);
+ };
+ updateToggle();
+ toggle.addEventListener('click',()=>{paused=!paused;velocity=0;updateToggle()});
+ if(prefersReduced.addEventListener)prefersReduced.addEventListener('change',e=>{
+  paused=e.matches;velocity=0;updateToggle();
+ });
+ function layout(now){
+  const w=viewport.clientWidth,h=viewport.clientHeight;
+  const mobile=w<600,tablet=w>=600&&w<920;
+  const scale=mobile?.66:tablet?.85:1;
+  const cardWidth=Math.round((mobile?143:195)*scale);
+  const cardHeight=Math.round((mobile?172:238)*scale);
+  const lanes=[
+   {x:mobile?.075:.13,y:mobile?.63:.73,dx:mobile?17:31,dy:mobile?-5.5:-10,z:mobile?25:35,rot:-63},
+   {x:mobile?.68:.70,y:mobile?.23:.22,dx:mobile?18:34,dy:mobile?-6:-10,z:mobile?24:37,rot:-60},
+   {x:mobile?.69:.73,y:mobile?.81:.79,dx:mobile?17:31,dy:mobile?-6:-11,z:mobile?26:37,rot:-64}
+  ];
+  tracks.forEach((cards,lane)=>{
+   const cfg=lanes[lane],len=cards.length;
+   const lanePhase=(phase*(lane===1?.89:lane===2?1.07:1))%len;
+   cards.forEach((card,i)=>{
+    const k=((i-lanePhase)%len+len)%len;
+    if(mobile&&k>10){card.style.visibility='hidden';return;}
+    card.style.visibility='visible';
+    const frontFade=clamp((k+.1)/.95,0,1);
+    const backFade=clamp((len-k)/3.5,0,1);
+    const opacity=Math.min(frontFade,backFade);
+    const x=cfg.x*w+k*cfg.dx-w*.5+
+      Math.sin(now*.0003+i*.25+lane)*2.5;
+    const y=cfg.y*h+k*cfg.dy-h*.5;
+    const z=-k*cfg.z+(lane===1?-35:0);
+    card.style.setProperty('--card-width',cardWidth+'px');
+    card.style.setProperty('--card-height',cardHeight+'px');
+    card.style.opacity=opacity.toFixed(3);
+    card.style.zIndex=String(Math.floor(300-k*9));
+    card.style.pointerEvents=(opacity<.28?'none':'auto');
+    card.style.transform='translate3d('+x.toFixed(1)+'px,'+
+     y.toFixed(1)+'px,'+z.toFixed(1)+'px) rotateY('+cfg.rot+
+     'deg) rotateX(3deg)';
+   });
+  });
+ }
+ function tick(now){
+  const dt=Math.min(.05,Math.max(0,(now-lastTime)/1000));
+  lastTime=now;
+  if(!gesture&&!blocked()&&!paused){
+   if(!(finePointer.matches&&hovered)){
+    phase+=dt*(.105+velocity);
+    velocity*=Math.exp(-2.8*dt);
+    if(Math.abs(velocity)<.005)velocity=0;
+   }
+  }
+  layout(now);
+  requestAnimationFrame(tick);
+ }
+ requestAnimationFrame(tick);
+ viewport.addEventListener('pointerenter',e=>{
+  if(e.pointerType==='mouse'&&finePointer.matches)hovered=true;
+ });
+ viewport.addEventListener('pointerleave',e=>{
+  if(e.pointerType==='mouse')hovered=false;
+ });
+ function startDrag(id,x,y){
+  if(blocked())return;
+  gesture={id,startX:x,startY:y,lastX:x,lastY:y,lastTime:performance.now(),speed:0,moved:false};
+  velocity=0;
+ }
+ function moveDrag(x,y,e){
+  if(!gesture)return;
+  const dx=x-gesture.lastX,dy=y-gesture.lastY;
+  if(!gesture.moved){
+   if(Math.hypot(x-gesture.startX,y-gesture.startY)<7)return;
+   gesture.moved=true;viewport.classList.add('dragging');
+  }
+  const major=Math.abs(x-gesture.startX)>Math.abs(y-gesture.startY)?dx:-dy;
+  const movement=-major*.027;
+  const now=performance.now(),dt=Math.max(.008,(now-gesture.lastTime)/1000);
+  phase+=movement;
+  gesture.speed=gesture.speed*.55+(movement/dt)*.45;
+  gesture.lastTime=now;gesture.lastX=x;gesture.lastY=y;
+  if(e?.cancelable)e.preventDefault();
+ }
+ function endDrag(){
+  if(!gesture)return;
+  if(gesture.moved){
+   velocity=clamp(gesture.speed,-12,12);
+   ignoreClickUntil=performance.now()+550;
+   viewport.classList.remove('dragging');
+  }
+  gesture=null;
+ }
+ viewport.addEventListener('wheel',e=>{
+  if(blocked())return;
+  e.preventDefault();
+  const delta=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
+  const d=clamp(delta*(e.deltaMode===1?15:1),-100,100);
+  phase+=d*.022;
+  velocity=clamp(velocity+d*.045,-11,11);
+ },{passive:false});
+ viewport.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='touch'||!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0))return;
+  startDrag(e.pointerId,e.clientX,e.clientY);
+ });
+ viewport.addEventListener('pointermove',e=>{
+  if(e.pointerType==='touch'||!gesture||gesture.id!==e.pointerId)return;
+  moveDrag(e.clientX,e.clientY,e);
+  if(gesture?.moved&&!viewport.hasPointerCapture(e.pointerId)){
+   try{viewport.setPointerCapture(e.pointerId)}catch(_){}
+  }
+ });
+ viewport.addEventListener('pointerup',e=>{
+  if(e.pointerType==='touch'||!gesture||gesture.id!==e.pointerId)return;
+  endDrag();
+  try{if(viewport.hasPointerCapture(e.pointerId))viewport.releasePointerCapture(e.pointerId)}catch(_){}
+ });
+ viewport.addEventListener('pointercancel',e=>{if(e.pointerType!=='touch')endDrag()});
+ viewport.addEventListener('lostpointercapture',()=>{if(gesture)endDrag()});
+ // Native touch events keep dragging reliable in mobile Safari.
+ viewport.addEventListener('touchstart',e=>{
+  if(e.touches.length!==1||blocked())return;
+  const t=e.touches[0];startDrag(t.identifier,t.clientX,t.clientY);
+ },{passive:true});
+ viewport.addEventListener('touchmove',e=>{
+  if(!gesture||e.touches.length!==1)return;
+  const t=e.touches[0];if(t.identifier!==gesture.id)return;
+  moveDrag(t.clientX,t.clientY,e);
+ },{passive:false});
+ viewport.addEventListener('touchend',e=>{
+  if(!gesture)return;
+  if(Array.from(e.changedTouches).some(t=>t.identifier===gesture.id))endDrag();
+ },{passive:true});
+ viewport.addEventListener('touchcancel',endDrag,{passive:true});
+ viewport.addEventListener('click',e=>{
+  if(performance.now()>=ignoreClickUntil)return;
+  e.preventDefault();e.stopImmediatePropagation();
+ },true);
+ viewport.addEventListener('click',e=>{
+  const card=e.target.closest('.spatial-card');
+  if(!card||blocked())return;
+  if(card.dataset.project){open(card.dataset.project);}
+  else if(card.dataset.archive!==undefined){
+   open('archive');
+   const button=document.querySelector('#overlay-body .archive-grid [data-archive="'+
+    card.dataset.archive+'"]');
+   if(button)button.click();
+  }
+ });
+ // Same outside-click behavior as the current official homepage.
+ document.addEventListener('click',e=>{
+  if(!home.classList.contains('overprinting'))return;
+  const target=e.target;
+  if(!(target instanceof Element))return;
+  if(target.closest('[data-go="about"],[data-go="contact"]'))return;
+  if(target.closest('#overprint-inner h2,#overprint-inner p,#overprint-inner a,#overprint-inner .about-photo'))return;
+  e.preventDefault();e.stopImmediatePropagation();close();
+ },true);
+
+ // Cinematic opening for both desktop and mobile, skipped for reduced motion
+ // and direct project/overlay links. The normal paragraph remains in the DOM
+ // for accessibility and determines the exact final landing position.
+ (function runIntro(){
+  const root=document.documentElement;
+  if(!root.classList.contains('intro-pending'))return;
+  const original=document.querySelector('.marquee-home .intro-original');
+  const target=document.querySelector('.marquee-home .intro');
+  const typed=document.getElementById('intro-typed');
+  const stageText=document.getElementById('intro-screen-text');
+  const motionQuery=window.matchMedia('(prefers-reduced-motion: reduce)');
+  let completed=false;
+  const skip=()=>{
+   if(completed)return;
+   completed=true;
+   root.classList.remove('intro-pending','intro-finishing','intro-booted');
+   typed.textContent='';
+  };
+  if(!original||!target||!typed||!stageText||motionQuery.matches||location.hash){
+   skip();return;
+  }
+  const chars=Array.from(original.textContent);
+  const bootMs=1280;
+  const cursorOnlyMs=950;
+  const typingMs=3250;
+  const fullTextHoldMs=280;
+  const transitionMs=1050;
+  let start=null;
+  function moveToLayout(){
+   if(completed)return;
+   const rect=target.getBoundingClientRect();
+   stageText.style.setProperty('--intro-final-top',rect.top+'px');
+   stageText.style.left=rect.left+'px';
+   stageText.style.width=rect.width+'px';
+   typed.textContent=original.textContent;
+   root.classList.add('intro-finishing');
+   setTimeout(skip,transitionMs+80);
+  }
+  function tick(now){
+   if(completed)return;
+   if(start===null)start=now;
+   const elapsed=now-start;
+   if(elapsed<bootMs){
+    requestAnimationFrame(tick);
+    return;
+   }
+   if(!root.classList.contains('intro-booted'))root.classList.add('intro-booted');
+   if(elapsed<bootMs+cursorOnlyMs){
+    requestAnimationFrame(tick);
+    return;
+   }
+   const progress=Math.min(1,(elapsed-bootMs-cursorOnlyMs)/typingMs);
+   const count=Math.min(chars.length,Math.floor(progress*chars.length));
+   typed.textContent=chars.slice(0,count).join('');
+   if(progress>=1){
+    setTimeout(moveToLayout,fullTextHoldMs);
+    return;
+   }
+   requestAnimationFrame(tick);
+  }
+  if(motionQuery.addEventListener)motionQuery.addEventListener('change',e=>{if(e.matches)skip()},{once:true});
+  window.addEventListener('popstate',skip,{once:true});
+  window.addEventListener('hashchange',skip,{once:true});
+  window.addEventListener('pagehide',skip,{once:true});
+  requestAnimationFrame(tick);
+ })();
+})();
+</script>
+</body>
+</html>
