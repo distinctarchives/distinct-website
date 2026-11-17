@@ -237,9 +237,9 @@ html.intro-pending .marquee-home .motion-toggle{
  .marquee-home .marquee-item{transition:none}
 }
 
-/* Test 12 — two stacks along a continuous diagonal, with one poster
-   separating from the archive as it travels between them.
-   This is an experiment; the published homepage is untouched. */
+/* Test 12 — one smooth, continuous diagonal deck of overlapping posters.
+   Print dimensions and 3D tilt stay fixed: only transforms change per frame.
+   This experiment does not change the published homepage. */
 .spatial-home .spatial-stage{
  top:27%;height:69dvh;display:block;z-index:2;
  pointer-events:none;overflow:visible
@@ -281,14 +281,6 @@ html.intro-pending .marquee-home .motion-toggle{
  display:block;width:100%;height:100%;object-fit:cover;
  user-select:none;-webkit-user-select:none;-webkit-user-drag:none;
  backface-visibility:hidden;pointer-events:none
-}
-.spatial-home .spatial-card.is-featured{
- padding:6px;background:#fcfcfa;border-color:#d9d9d5;
- box-shadow:
-   3px 2px 0 #e4e4e0,
-   7px 5px 0 #b9b9b5,
-   15px 20px 27px rgba(15,15,15,.17),
-   28px 34px 45px rgba(15,15,15,.13)
 }
 .spatial-home .spatial-card:hover,
 .spatial-home .spatial-card:focus-visible{
@@ -399,7 +391,7 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
  }
  // A single row; all other rack groups have been removed.
  const rack=document.getElementById('spatial-rack-0');
- const cards=Array.from({length:36},(_,i)=>{
+ const cards=Array.from({length:28},(_,i)=>{
   const item=imagePool[(i*9)%imagePool.length];
   const card=document.createElement('button');
   card.className='spatial-card';card.type='button';
@@ -409,7 +401,7 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
   const img=document.createElement('img');
   img.src=encodeURI(item.src);
   img.alt=item.alt;img.draggable=false;
-  img.loading=i<14?'eager':'lazy';img.decoding='async';
+  img.loading=i<12?'eager':'lazy';img.decoding='async';
   const caption=document.createElement('span');
   caption.className='spatial-caption';
   caption.textContent=item.label+' ↗';
@@ -436,98 +428,85 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
  if(prefersReduced.addEventListener)prefersReduced.addEventListener('change',e=>{
   paused=e.matches;velocity=0;updateToggle();
  });
- // A continuous cycle: each print approaches from the top-right stack,
- // becomes the isolated feature in the central gap, then joins the lower-left
- // stack. Positions are bounded to the viewport so no posters get cut off.
- const lerp=(a,b,t)=>a+(b-a)*t;
- const smooth=t=>{t=clamp(t,0,1);return t*t*(3-2*t)};
- const blend=(a,b,t)=>({
-  x:lerp(a.x,b.x,t),y:lerp(a.y,b.y,t),z:lerp(a.z,b.z,t),
-  angle:lerp(a.angle,b.angle,t),shear:lerp(a.shear,b.shear,t),
-  w:lerp(a.w,b.w,t),h:lerp(a.h,b.h,t)
- });
- function layout(){
+ // Single uninterrupted perspective rack. All cards keep their size and
+ // orientation; no mid-stream layout swaps, scaling or split-stack jumps.
+ const len=cards.length;
+ let targetPhase=phase;
+ let geometry=null,layoutDirty=true,lastRendered=NaN;
+ function measure(){
   const w=viewport.clientWidth,h=viewport.clientHeight;
   if(!w||!h)return;
   const mobile=w<600,tablet=w>=600&&w<950;
-  const cw=mobile?88:tablet?123:Math.min(174,w*.106);
-  const ch=mobile?118:tablet?158:Math.min(215,h*.355);
-  const heroW=cw*(mobile?1.48:1.43);
-  const heroH=ch*(mobile?1.40:1.39);
-  const xStep=w*(mobile?.038:tablet?.026:.0225);
-  const yStep=h*(mobile?.022:tablet?.020:.019);
-  const right={
-   x:w*(mobile?.675:tablet?.66:.66),y:h*(mobile?.35:.32),
-   z:20,angle:-21,shear:17,w:cw,h:ch
+  const cw=mobile?Math.min(103,w*.27):tablet?126:Math.min(151,w*.095);
+  const ch=Math.round(cw*1.29);
+  geometry={
+   w,h,visible:mobile?11:tablet?15:19,
+   x0:w*(mobile?.18:tablet?.18:.18),
+   y0:h*(mobile?.77:tablet?.78:.78),
+   dx:w*(mobile?.060:tablet?.046:.038),
+   dy:h*(mobile?.039:tablet?.031:.026),
+   dz:mobile?8:tablet?10:12,
+   angle:mobile?-24:-27,
+   skew:mobile?15:17
   };
-  const left={
-   x:w*(mobile?.34:tablet?.35:.35),y:h*(mobile?.635:.62),
-   z:19,angle:-21,shear:17,w:cw,h:ch
-  };
-  const center={
-   x:w*.5,y:h*(mobile?.48:.48),
-   z:160,angle:-10,shear:15,w:heroW,h:heroH
-  };
-  const visible=mobile?7:tablet?9:11;
-  const count=cards.length;
-  const cycle=((phase%count)+count)%count;
+  cards.forEach(card=>{
+   card.style.setProperty('--card-width',cw+'px');
+   card.style.setProperty('--card-height',ch+'px');
+  });
+  layoutDirty=true;
+ }
+ if('ResizeObserver' in window)new ResizeObserver(measure).observe(viewport);
+ window.addEventListener('resize',measure,{passive:true});
+ measure();
+ function layout(){
+  const g=geometry;if(!g)return;
+  const {w,h,visible,x0,y0,dx,dy,dz,angle,skew}=g;
   cards.forEach((card,i)=>{
-   const k=((i-cycle+count*1.5)%count)-count*.5;
-   if(k>visible+.5||k<-(visible+.5)){
-    card.style.visibility='hidden';card.style.pointerEvents='none';
-    card.classList.remove('is-featured');
+   // Wrap only after a card has fully left the rendered range.
+   const k=((i+phase)%len+len)%len;
+   if(k>visible+.4){
+    if(card.style.visibility!=='hidden'){
+     card.style.visibility='hidden';
+     card.style.pointerEvents='none';
+    }
     return;
    }
-   let p,opacity=1;
-   if(k>=.42){
-    const d=Math.max(0,k-1);
-    p={...right,x:right.x+d*xStep,y:right.y-d*yStep,
-       z:right.z-d*5};
-    opacity=Math.min(1,clamp((visible+.6-k)/1.4,0,1));
-   }else if(k>=.04){
-    p=blend(right,center,smooth((.42-k)/.38));
-   }else if(k>=-.20){
-    p=center;
-   }else if(k>=-.64){
-    p=blend(center,left,smooth((-.20-k)/.44));
-   }else{
-    const d=Math.max(0,-k-1);
-    p={...left,x:left.x-d*xStep,y:left.y+d*yStep,
-       z:left.z-d*5};
-    opacity=Math.min(1,clamp((visible+.6+k)/1.4,0,1));
-   }
-   const pop=(k<.22&&k>-.43);
-   const isHovered=card===activeCard&&opacity>.4;
-   if(isHovered){
-    p={...p,z:p.z+62,y:p.y-14,
-       angle:p.angle+9,shear:p.shear-4};
-   }
-   // Avoid huge shadow/overlap changes at the stream boundary.
-   card.classList.toggle('is-featured',pop);
-   card.style.setProperty('--card-width',p.w.toFixed(2)+'px');
-   card.style.setProperty('--card-height',p.h.toFixed(2)+'px');
-   card.style.opacity=opacity.toFixed(3);
-   card.style.visibility='visible';
-   card.style.pointerEvents=opacity>.25?'auto':'none';
-   card.style.zIndex=String(isHovered?1000:pop?900:
-      Math.floor(550-Math.abs(k)*18));
+   if(card.style.visibility!=='visible')card.style.visibility='visible';
+   const fadeIn=clamp(k/.55,0,1);
+   const fadeOut=clamp((visible+.4-k)/1.5,0,1);
+   const opacity=Math.min(fadeIn,fadeOut);
+   const x=x0+k*dx-w*.5;
+   const y=y0-k*dy-h*.5;
+   const z=55-k*dz;
    card.style.transform='translate3d('+
-      (p.x-w*.5).toFixed(2)+'px,'+(p.y-h*.5).toFixed(2)+'px,'+
-      p.z.toFixed(2)+'px) rotateY('+p.angle.toFixed(2)+
-      'deg) skewY('+p.shear.toFixed(2)+'deg) rotateX(1deg)';
+    x.toFixed(2)+'px,'+y.toFixed(2)+'px,'+z.toFixed(2)+
+    'px) rotateY('+angle+'deg) skewY('+skew+'deg) rotateX(3deg)';
+   card.style.opacity=opacity.toFixed(3);
+   const rank=Math.round(600-k*12);
+   const zIndex=card===activeCard?900:rank;
+   if(card.style.zIndex!==String(zIndex))card.style.zIndex=String(zIndex);
+   const events=opacity>.3?'auto':'none';
+   if(card.style.pointerEvents!==events)card.style.pointerEvents=events;
   });
+  lastRendered=phase;
+  layoutDirty=false;
  }
  function tick(now){
   const dt=Math.min(.05,Math.max(0,(now-lastTime)/1000));
   lastTime=now;
-  if(!gesture&&!blocked()&&!paused){
+  const isBlocked=blocked();
+  if(!gesture&&!isBlocked&&!paused){
+   // Smooth constant drift and momentum, without per-frame geometry changes.
    if(!(finePointer.matches&&hovered)){
-    phase+=dt*(.12+velocity);
-    velocity*=Math.exp(-2.8*dt);
-    if(Math.abs(velocity)<.005)velocity=0;
+    targetPhase+=dt*(.19+velocity);
    }
+   velocity*=Math.exp(-3.4*dt);
+   if(Math.abs(velocity)<.004)velocity=0;
   }
-  layout();
+  // Damping smooths wheel and touch event bursts. Remains frame-rate independent.
+  const response=1-Math.exp(-16*dt);
+  phase+=(targetPhase-phase)*response;
+  if(layoutDirty||Math.abs(phase-lastRendered)>.00012)layout();
   requestAnimationFrame(tick);
  }
  requestAnimationFrame(tick);
@@ -550,9 +529,9 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
    gesture.moved=true;viewport.classList.add('dragging');
   }
   const major=Math.abs(x-gesture.startX)>Math.abs(y-gesture.startY)?dx:-dy;
-  const movement=-major*.023;
+  const movement=-major*.016;
   const now=performance.now(),dt=Math.max(.008,(now-gesture.lastTime)/1000);
-  phase+=movement;
+  targetPhase+=movement;
   gesture.speed=gesture.speed*.55+(movement/dt)*.45;
   gesture.lastTime=now;gesture.lastX=x;gesture.lastY=y;
   if(e?.cancelable)e.preventDefault();
@@ -560,7 +539,7 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
  function endDrag(){
   if(!gesture)return;
   if(gesture.moved){
-   velocity=clamp(gesture.speed,-9,9);
+   velocity=clamp(gesture.speed,-4,4);
    ignoreClickUntil=performance.now()+550;
    viewport.classList.remove('dragging');
   }
@@ -571,8 +550,8 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
   e.preventDefault();
   const delta=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
   const d=clamp(delta*(e.deltaMode===1?15:1),-100,100);
-  phase+=d*.018;
-  velocity=clamp(velocity+d*.037,-9,9);
+  targetPhase+=d*.007;
+  velocity=clamp(velocity+d*.012,-4,4);
  },{passive:false});
  viewport.addEventListener('pointerdown',e=>{
   if(e.pointerType==='touch'||!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0))return;
