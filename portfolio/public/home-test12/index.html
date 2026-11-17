@@ -237,17 +237,24 @@ html.intro-pending .marquee-home .motion-toggle{
  .marquee-home .marquee-item{transition:none}
 }
 
-/* Spatial 3D study — only the image presentation changes.
-   The intro, project navigation, About and Contact remain intact. */
+/* Test 12: a single diagonal rack of physical-looking printed posters.
+   The text, opening sequence, About, Contact and projects are unchanged. */
 .spatial-home .spatial-stage{
- top:38%;height:57dvh;display:block;z-index:2;pointer-events:none;
- overflow:visible
+ top:34%;height:62dvh;display:block;z-index:2;
+ pointer-events:none;overflow:visible
 }
 .spatial-home .spatial-window{
  position:absolute;inset:0;overflow:hidden;pointer-events:auto;
- perspective:1200px;perspective-origin:50% 46%;
+ perspective:1180px;perspective-origin:48% 45%;
  transform-style:preserve-3d;touch-action:none;
  cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none
+}
+.spatial-home .spatial-window::before{
+ content:"";position:absolute;left:18%;top:52%;
+ width:80%;height:42%;pointer-events:none;
+ background:radial-gradient(ellipse at center,rgba(0,0,0,.12),transparent 66%);
+ filter:blur(32px);transform:rotate(-13deg);
+ opacity:.8
 }
 .spatial-home .spatial-window.dragging,
 .spatial-home .spatial-window.dragging *{cursor:grabbing!important}
@@ -256,66 +263,59 @@ html.intro-pending .marquee-home .motion-toggle{
 }
 .spatial-home .spatial-card{
  display:block;position:absolute;top:50%;left:50%;
- width:var(--card-width,180px);height:var(--card-height,220px);
- margin-left:calc(var(--card-width,180px)*-.5);
- margin-top:calc(var(--card-height,220px)*-.5);
- padding:0;border:1px solid rgba(20,20,20,.055);
- border-radius:0;background:#f0f0ed;color:#171717;
- box-shadow:0 8px 20px rgba(0,0,0,.09);
- overflow:visible;transform-style:preserve-3d;
- backface-visibility:hidden;will-change:transform,opacity;
- pointer-events:auto;cursor:pointer;
+ width:var(--card-width,220px);height:var(--card-height,270px);
+ margin-left:calc(var(--card-width,220px)*-.5);
+ margin-top:calc(var(--card-height,270px)*-.5);
+ padding:5px;border:1px solid #dededb;border-radius:0;
+ background:#fbfbf9;color:#171717;overflow:visible;
+ transform-origin:center center;
+ backface-visibility:hidden;transform-style:preserve-3d;
+ box-shadow:3px 1px 0 #ededeb,6px 3px 0 #c8c8c5,
+            10px 12px 19px rgba(14,14,14,.15),
+            21px 25px 38px rgba(14,14,14,.17);
+ will-change:transform,opacity;pointer-events:auto;cursor:pointer;
+}
+.spatial-home .spatial-card::after{
+ content:"";position:absolute;z-index:-1;
+ top:3px;bottom:-4px;right:-5px;width:4px;
+ background:linear-gradient(to right,#cfcfcb,#f9f9f5 55%,#b5b5b1);
+ border-right:1px solid #a4a4a0;pointer-events:none
 }
 .spatial-home .spatial-card img{
  display:block;width:100%;height:100%;object-fit:cover;
  user-select:none;-webkit-user-select:none;-webkit-user-drag:none;
- backface-visibility:hidden;pointer-events:none;
+ backface-visibility:hidden;pointer-events:none
 }
-.spatial-home .spatial-card:focus-visible{outline:3px solid #f7a0c8;outline-offset:3px}
+.spatial-home .spatial-card:hover,
+.spatial-home .spatial-card:focus-visible{
+ box-shadow:3px 1px 0 #f5f5f2,7px 4px 0 #bababa,
+            18px 22px 28px rgba(0,0,0,.2),
+            32px 36px 50px rgba(0,0,0,.17)
+}
+.spatial-home .spatial-card:focus-visible{outline:3px solid #f7a0c8;outline-offset:5px}
 .spatial-home .spatial-card .spatial-caption{
  position:absolute;left:-1px;bottom:-26px;white-space:nowrap;
  background:#fff;color:#171717;font-size:10px;line-height:1.15;
  padding:4px 6px;border:1px solid #e8e8e8;
- letter-spacing:0;opacity:0;
- transition:opacity .15s ease
+ letter-spacing:0;opacity:0;transition:opacity .15s ease
 }
 .spatial-home .spatial-card:hover .spatial-caption,
 .spatial-home .spatial-card:focus-visible .spatial-caption{opacity:1}
-.spatial-home #home-image{
- display:block;position:absolute;z-index:4;
- width:min(22vw,280px);height:min(28vh,240px);
- aspect-ratio:auto;left:51%;top:72%;bottom:auto;
- transform:translate(-50%,-50%) rotateY(-13deg) rotateZ(1deg);
- transform-origin:center;box-shadow:0 18px 38px rgba(0,0,0,.16);
- border:1px solid #ececec;overflow:hidden;
- transition:opacity .8s ease,transform .35s ease,filter .25s ease;
-}
-.spatial-home #home-image img{object-fit:cover}
-.spatial-home #home-image:hover,
-.spatial-home #home-image:focus-visible{
- transform:translate(-50%,-54%) rotateY(0deg) rotateZ(0deg) scale(1.04)
-}
-html.intro-pending .spatial-home #home-image{
- opacity:0;visibility:hidden;pointer-events:none
-}
+.spatial-home #home-image{display:none}
 .spatial-home .marquee-hint{z-index:6}
-.spatial-home.overprinting .spatial-stage,
-.spatial-home.overprinting #home-image{pointer-events:none}
-@media(max-width:800px){
- .spatial-home .spatial-stage{top:47%;height:47dvh}
- .spatial-home #home-image{
-  left:51%;top:74%;width:min(28vw,195px);height:min(22vh,180px)
- }
+.spatial-home.overprinting .spatial-stage{pointer-events:none}
+@media(max-width:900px){
+ .spatial-home .spatial-stage{top:44%;height:52dvh}
 }
 @media(max-width:500px){
- .spatial-home .spatial-stage{top:51%;height:42dvh}
- .spatial-home .spatial-window{perspective:850px}
- .spatial-home #home-image{
-  left:50%;top:75%;width:min(33vw,140px);height:min(19vh,145px)
+ .spatial-home .spatial-stage{top:51%;height:43dvh}
+ .spatial-home .spatial-window{perspective:860px}
+ .spatial-home .spatial-window::before{
+  width:93%;left:4%;top:62%;height:34%;filter:blur(19px)
  }
 }
 @media(prefers-reduced-motion:reduce){
- .spatial-home #home-image,.spatial-home .spatial-card{transition:none}
+ .spatial-home .spatial-card{transition:none}
 }
 
 </style>
@@ -342,10 +342,8 @@ html.intro-pending .spatial-home #home-image{
  </div>
 
  <div class="marquee-stage spatial-stage">
-  <div class="spatial-window" id="spatial-window" aria-label="Three-dimensional collection of projects and visual archive images. Drag or scroll to explore.">
+  <div class="spatial-window" id="spatial-window" aria-label="One diagonal row of stacked project posters and archive prints. Scroll, drag or swipe to explore.">
    <div class="spatial-rack" id="spatial-rack-0"></div>
-   <div class="spatial-rack" id="spatial-rack-1"></div>
-   <div class="spatial-rack" id="spatial-rack-2"></div>
   </div>
  </div>
  <div class="marquee-hint">Swipe or scroll to spin<br>Tap an image to explore</div>
@@ -371,40 +369,55 @@ html.intro-pending .spatial-home #home-image{
  const blocked=()=>document.documentElement.classList.contains('intro-pending')||
   home.classList.contains('overprinting')||overlay.classList.contains('open');
  const imagePool=[];
- DATA.projects.forEach(p=>{
-  p.media.filter(m=>m.kind==='image').slice(0,5).forEach(m=>imagePool.push({
-   src:'/'+m.src,alt:p.title+' — project image',label:p.title,
-   project:p.slug
-  }));
- });
- DATA.archive.forEach((a,i)=>imagePool.push({
-  src:'/'+a.src,alt:'Visual archive '+a.title,label:'Archive / '+a.title,
-  archive:i
+ const projectImgs=DATA.projects.map(p=>({
+  p,files:p.media.filter(m=>m.kind==='image')
  }));
- const banks=[0,19,39].map(seed=>Array.from({length:16},(_,i)=>
-  imagePool[(seed+i*7)%imagePool.length]));
- const tracks=banks.map((bank,lane)=>{
-  const group=document.getElementById('spatial-rack-'+lane);
-  return bank.map((item,i)=>{
-   const card=document.createElement('button');
-   card.className='spatial-card';
-   card.type='button';
-   card.setAttribute('aria-label','Open '+item.label);
-   if(item.project)card.dataset.project=item.project;
-   else card.dataset.archive=String(item.archive);
-   const img=document.createElement('img');
-   img.src=encodeURI(item.src);
-   img.alt=item.alt;img.draggable=false;
-   img.loading=(i<6?'eager':'lazy');
-   img.decoding='async';
-   const caption=document.createElement('span');
-   caption.className='spatial-caption';
-   caption.textContent=item.label+' ↗';
-   card.append(img,caption);group.append(card);
-   return card;
+ // Interleave work and archive prints so one stack feels like a real archive.
+ for(let round=0;round<7;round++){
+  projectImgs.forEach(({p,files},j)=>{
+   if(files.length){
+    const m=files[round%files.length];
+    imagePool.push({
+     src:'/'+m.src,alt:p.title+' — project image',
+     label:p.title,project:p.slug
+    });
+   }
+   const aIndex=(round*6+j*7)%DATA.archive.length;
+   const a=DATA.archive[aIndex];
+   imagePool.push({
+    src:'/'+a.src,alt:'Visual archive '+a.title,
+    label:'Archive / '+a.title,archive:aIndex
+   });
   });
+ }
+ // A single row; all other rack groups have been removed.
+ const rack=document.getElementById('spatial-rack-0');
+ const cards=Array.from({length:36},(_,i)=>{
+  const item=imagePool[(i*9)%imagePool.length];
+  const card=document.createElement('button');
+  card.className='spatial-card';card.type='button';
+  card.setAttribute('aria-label','Open '+item.label);
+  if(item.project)card.dataset.project=item.project;
+  else card.dataset.archive=String(item.archive);
+  const img=document.createElement('img');
+  img.src=encodeURI(item.src);
+  img.alt=item.alt;img.draggable=false;
+  img.loading=i<14?'eager':'lazy';img.decoding='async';
+  const caption=document.createElement('span');
+  caption.className='spatial-caption';
+  caption.textContent=item.label+' ↗';
+  card.append(img,caption);
+  rack.append(card);
+  return card;
  });
- let phase=0,velocity=0,gesture=null,ignoreClickUntil=0,hovered=false;
+ let activeCard=null;
+ cards.forEach(card=>{
+  card.addEventListener('mouseenter',()=>{activeCard=card});
+  card.addEventListener('mouseleave',()=>{if(activeCard===card)activeCard=null});
+  card.addEventListener('focus',()=>{activeCard=card});
+  card.addEventListener('blur',()=>{if(activeCard===card)activeCard=null});
+ });
+ let phase=.25,velocity=0,gesture=null,ignoreClickUntil=0,hovered=false;
  let paused=prefersReduced.matches,lastTime=performance.now();
  const updateToggle=()=>{
   toggle.textContent=paused?'Play motion':'Pause motion';
@@ -416,40 +429,46 @@ html.intro-pending .spatial-home #home-image{
  if(prefersReduced.addEventListener)prefersReduced.addEventListener('change',e=>{
   paused=e.matches;velocity=0;updateToggle();
  });
- function layout(now){
+ function layout(){
   const w=viewport.clientWidth,h=viewport.clientHeight;
-  const mobile=w<600,tablet=w>=600&&w<920;
-  const scale=mobile?.66:tablet?.85:1;
-  const cardWidth=Math.round((mobile?143:195)*scale);
-  const cardHeight=Math.round((mobile?172:238)*scale);
-  const lanes=[
-   {x:mobile?.075:.13,y:mobile?.63:.73,dx:mobile?17:31,dy:mobile?-5.5:-10,z:mobile?25:35,rot:-63},
-   {x:mobile?.68:.70,y:mobile?.23:.22,dx:mobile?18:34,dy:mobile?-6:-10,z:mobile?24:37,rot:-60},
-   {x:mobile?.69:.73,y:mobile?.81:.79,dx:mobile?17:31,dy:mobile?-6:-11,z:mobile?26:37,rot:-64}
-  ];
-  tracks.forEach((cards,lane)=>{
-   const cfg=lanes[lane],len=cards.length;
-   const lanePhase=(phase*(lane===1?.89:lane===2?1.07:1))%len;
-   cards.forEach((card,i)=>{
-    const k=((i-lanePhase)%len+len)%len;
-    if(mobile&&k>10){card.style.visibility='hidden';return;}
-    card.style.visibility='visible';
-    const frontFade=clamp((k+.1)/.95,0,1);
-    const backFade=clamp((len-k)/3.5,0,1);
-    const opacity=Math.min(frontFade,backFade);
-    const x=cfg.x*w+k*cfg.dx-w*.5+
-      Math.sin(now*.0003+i*.25+lane)*2.5;
-    const y=cfg.y*h+k*cfg.dy-h*.5;
-    const z=-k*cfg.z+(lane===1?-35:0);
-    card.style.setProperty('--card-width',cardWidth+'px');
-    card.style.setProperty('--card-height',cardHeight+'px');
-    card.style.opacity=opacity.toFixed(3);
-    card.style.zIndex=String(Math.floor(300-k*9));
-    card.style.pointerEvents=(opacity<.28?'none':'auto');
-    card.style.transform='translate3d('+x.toFixed(1)+'px,'+
-     y.toFixed(1)+'px,'+z.toFixed(1)+'px) rotateY('+cfg.rot+
-     'deg) rotateX(3deg)';
-   });
+  if(!w||!h)return;
+  const mobile=w<600,tablet=w>=600&&w<900;
+  const cw=mobile?151:tablet?180:225;
+  const ch=mobile?192:tablet?230:283;
+  const count=cards.length;
+  const visibleEnd=mobile?15:tablet?20:27;
+  const frontX=w*(mobile?.23:tablet?.25:.34);
+  const frontY=h*(mobile?.70:tablet?.72:.76);
+  const dx=mobile?24:tablet?30:37;
+  const dy=mobile?9.2:tablet?10.7:13.5;
+  const depth=mobile?17:tablet?21:25;
+  const baseAngle=mobile?-51:-57;
+  const cycle=((phase%count)+count)%count;
+  cards.forEach((card,i)=>{
+   const k=(i-cycle+count)%count;
+   if(k>=visibleEnd+1){
+    card.style.visibility='hidden';
+    card.style.pointerEvents='none';return;
+   }
+   card.style.visibility='visible';
+   // Fade the front print as it leaves; reveal the next poster underneath it.
+   const frontFade=clamp(k/.64,0,1);
+   const backFade=clamp((visibleEnd-k)/2,0,1);
+   const opacity=Math.min(frontFade,backFade);
+   const isHovered=card===activeCard&&opacity>.35;
+   const pull=clamp(1-k/1.4,0,1);
+   const x=frontX+k*dx-22*pull-(isHovered?16:0)-w*.5;
+   const y=frontY-k*dy+22*pull-(isHovered?22:0)-h*.5;
+   const z=130-k*depth+65*pull+(isHovered?105:0);
+   const angle=baseAngle+15*pull+(isHovered?24:0);
+   card.style.setProperty('--card-width',cw+'px');
+   card.style.setProperty('--card-height',ch+'px');
+   card.style.opacity=opacity.toFixed(3);
+   card.style.pointerEvents=opacity>.3?'auto':'none';
+   card.style.zIndex=String(isHovered?1000:Math.floor(400-k*10));
+   card.style.transform='translate3d('+x.toFixed(1)+'px,'+
+    y.toFixed(1)+'px,'+z.toFixed(1)+'px) rotateY('+
+    angle.toFixed(1)+'deg) rotateX(4deg) rotateZ(-1.6deg)';
   });
  }
  function tick(now){
@@ -457,12 +476,12 @@ html.intro-pending .spatial-home #home-image{
   lastTime=now;
   if(!gesture&&!blocked()&&!paused){
    if(!(finePointer.matches&&hovered)){
-    phase+=dt*(.105+velocity);
+    phase+=dt*(.12+velocity);
     velocity*=Math.exp(-2.8*dt);
     if(Math.abs(velocity)<.005)velocity=0;
    }
   }
-  layout(now);
+  layout();
   requestAnimationFrame(tick);
  }
  requestAnimationFrame(tick);
@@ -485,7 +504,7 @@ html.intro-pending .spatial-home #home-image{
    gesture.moved=true;viewport.classList.add('dragging');
   }
   const major=Math.abs(x-gesture.startX)>Math.abs(y-gesture.startY)?dx:-dy;
-  const movement=-major*.027;
+  const movement=-major*.023;
   const now=performance.now(),dt=Math.max(.008,(now-gesture.lastTime)/1000);
   phase+=movement;
   gesture.speed=gesture.speed*.55+(movement/dt)*.45;
@@ -495,7 +514,7 @@ html.intro-pending .spatial-home #home-image{
  function endDrag(){
   if(!gesture)return;
   if(gesture.moved){
-   velocity=clamp(gesture.speed,-12,12);
+   velocity=clamp(gesture.speed,-9,9);
    ignoreClickUntil=performance.now()+550;
    viewport.classList.remove('dragging');
   }
@@ -506,8 +525,8 @@ html.intro-pending .spatial-home #home-image{
   e.preventDefault();
   const delta=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
   const d=clamp(delta*(e.deltaMode===1?15:1),-100,100);
-  phase+=d*.022;
-  velocity=clamp(velocity+d*.045,-11,11);
+  phase+=d*.018;
+  velocity=clamp(velocity+d*.037,-9,9);
  },{passive:false});
  viewport.addEventListener('pointerdown',e=>{
   if(e.pointerType==='touch'||!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0))return;
