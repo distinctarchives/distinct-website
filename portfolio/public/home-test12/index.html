@@ -237,15 +237,16 @@ html.intro-pending .marquee-home .motion-toggle{
  .marquee-home .marquee-item{transition:none}
 }
 
-/* Test 12: a single diagonal rack of physical-looking printed posters.
-   The text, opening sequence, About, Contact and projects are unchanged. */
+/* Test 12: an oblique-angle archive viewed from above and slightly to the
+   side. Poster faces stay broad and readable while their paper edges
+   stack tightly into the upper-right distance, like the reference. */
 .spatial-home .spatial-stage{
- top:34%;height:62dvh;display:block;z-index:2;
+ top:32%;height:65dvh;display:block;z-index:2;
  pointer-events:none;overflow:visible
 }
 .spatial-home .spatial-window{
  position:absolute;inset:0;overflow:hidden;pointer-events:auto;
- perspective:1180px;perspective-origin:48% 45%;
+ perspective:1350px;perspective-origin:47% 40%;
  transform-style:preserve-3d;touch-action:none;
  cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none
 }
@@ -263,9 +264,9 @@ html.intro-pending .marquee-home .motion-toggle{
 }
 .spatial-home .spatial-card{
  display:block;position:absolute;top:50%;left:50%;
- width:var(--card-width,220px);height:var(--card-height,270px);
- margin-left:calc(var(--card-width,220px)*-.5);
- margin-top:calc(var(--card-height,270px)*-.5);
+ width:var(--card-width,250px);height:var(--card-height,205px);
+ margin-left:calc(var(--card-width,250px)*-.5);
+ margin-top:calc(var(--card-height,205px)*-.5);
  padding:5px;border:1px solid #dededb;border-radius:0;
  background:#fbfbf9;color:#171717;overflow:visible;
  transform-origin:center center;
@@ -305,13 +306,13 @@ html.intro-pending .marquee-home .motion-toggle{
 .spatial-home .marquee-hint{z-index:6}
 .spatial-home.overprinting .spatial-stage{pointer-events:none}
 @media(max-width:900px){
- .spatial-home .spatial-stage{top:44%;height:52dvh}
+ .spatial-home .spatial-stage{top:41%;height:55dvh}
 }
 @media(max-width:500px){
- .spatial-home .spatial-stage{top:51%;height:43dvh}
- .spatial-home .spatial-window{perspective:860px}
+ .spatial-home .spatial-stage{top:49%;height:47dvh}
+ .spatial-home .spatial-window{perspective:960px;perspective-origin:49% 38%}
  .spatial-home .spatial-window::before{
-  width:93%;left:4%;top:62%;height:34%;filter:blur(19px)
+  width:93%;left:4%;top:58%;height:34%;filter:blur(19px)
  }
 }
 @media(prefers-reduced-motion:reduce){
@@ -433,16 +434,19 @@ html.intro-pending .marquee-home .motion-toggle{
   const w=viewport.clientWidth,h=viewport.clientHeight;
   if(!w||!h)return;
   const mobile=w<600,tablet=w>=600&&w<900;
-  const cw=mobile?151:tablet?180:225;
-  const ch=mobile?192:tablet?230:283;
+  // Horizontal, shallow-angled poster faces, as in the reference:
+  // their top/bottom edges slope down-right while the stack runs up-right.
+  const cw=mobile?166:tablet?208:257;
+  const ch=mobile?139:tablet?170:208;
   const count=cards.length;
-  const visibleEnd=mobile?15:tablet?20:27;
-  const frontX=w*(mobile?.23:tablet?.25:.34);
-  const frontY=h*(mobile?.70:tablet?.72:.76);
-  const dx=mobile?24:tablet?30:37;
-  const dy=mobile?9.2:tablet?10.7:13.5;
-  const depth=mobile?17:tablet?21:25;
-  const baseAngle=mobile?-51:-57;
+  const visibleEnd=mobile?16:tablet?24:30;
+  const frontX=w*(mobile?.30:tablet?.41:.465);
+  const frontY=h*(mobile?.65:tablet?.55:.49);
+  const dx=mobile?15:tablet?20:23.5;
+  const dy=mobile?5.8:tablet?7.7:9.2;
+  const depth=mobile?12:tablet?15:17;
+  const baseAngle=mobile?-28:-31;
+  const faceShear=mobile?17:21;
   const cycle=((phase%count)+count)%count;
   cards.forEach((card,i)=>{
    const k=(i-cycle+count)%count;
@@ -457,10 +461,10 @@ html.intro-pending .marquee-home .motion-toggle{
    const opacity=Math.min(frontFade,backFade);
    const isHovered=card===activeCard&&opacity>.35;
    const pull=clamp(1-k/1.4,0,1);
-   const x=frontX+k*dx-22*pull-(isHovered?16:0)-w*.5;
-   const y=frontY-k*dy+22*pull-(isHovered?22:0)-h*.5;
-   const z=130-k*depth+65*pull+(isHovered?105:0);
-   const angle=baseAngle+15*pull+(isHovered?24:0);
+   const x=frontX+k*dx-10*pull-(isHovered?14:0)-w*.5;
+   const y=frontY-k*dy+8*pull-(isHovered?18:0)-h*.5;
+   const z=115-k*depth+38*pull+(isHovered?90:0);
+   const angle=baseAngle+5*pull+(isHovered?15:0);
    card.style.setProperty('--card-width',cw+'px');
    card.style.setProperty('--card-height',ch+'px');
    card.style.opacity=opacity.toFixed(3);
@@ -468,7 +472,7 @@ html.intro-pending .marquee-home .motion-toggle{
    card.style.zIndex=String(isHovered?1000:Math.floor(400-k*10));
    card.style.transform='translate3d('+x.toFixed(1)+'px,'+
     y.toFixed(1)+'px,'+z.toFixed(1)+'px) rotateY('+
-    angle.toFixed(1)+'deg) rotateX(4deg) rotateZ(-1.6deg)';
+    angle.toFixed(1)+'deg) skewY('+faceShear+'deg) rotateX(2deg)';
   });
  }
  function tick(now){
