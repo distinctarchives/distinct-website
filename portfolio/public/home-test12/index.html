@@ -265,33 +265,48 @@ html.intro-pending .marquee-home .motion-toggle{
  background:transparent;color:#171717;overflow:visible;
  transform-origin:center;transform-style:preserve-3d;
  backface-visibility:hidden;will-change:transform,opacity;
+ pointer-events:auto;cursor:pointer
+}
+/* The button keeps a steady hit area; only the artwork floats on hover. */
+.spatial-home .spatial-face{
+ position:relative;display:block;width:100%;height:100%;
+ transform:translate3d(0,0,0);transform-origin:50% 60%;
+ transform-style:preserve-3d;pointer-events:none;
  box-shadow:1px 1px 0 rgba(15,15,15,.22),
             3px 4px 6px rgba(15,15,15,.13),
             10px 15px 24px rgba(15,15,15,.11);
- pointer-events:auto;cursor:pointer
+ transition:transform .43s cubic-bezier(.22,1,.36,1),
+            box-shadow .4s ease;
 }
 .spatial-home .spatial-card img{
  display:block;width:100%;height:100%;object-fit:cover;
  user-select:none;-webkit-user-select:none;-webkit-user-drag:none;
  backface-visibility:hidden;pointer-events:none
 }
-.spatial-home .spatial-card:hover,
-.spatial-home .spatial-card:focus-visible{
- box-shadow:1px 1px 0 rgba(15,15,15,.27),
-            6px 8px 12px rgba(15,15,15,.17),
-            18px 26px 34px rgba(15,15,15,.15)
+.spatial-home .spatial-card:hover .spatial-face,
+.spatial-home .spatial-card:focus-visible .spatial-face{
+ transform:translate3d(0,calc(-1 * clamp(32px,5.5vh,58px)),86px) scale(1.075);
+ box-shadow:2px 3px 0 rgba(15,15,15,.19),
+            9px 14px 20px rgba(15,15,15,.17),
+            20px 32px 42px rgba(15,15,15,.20)
 }
 .spatial-home .spatial-card:focus-visible{
  outline:3px solid #f7a0c8;outline-offset:4px
 }
 .spatial-home .spatial-card .spatial-caption{
- position:absolute;left:-1px;bottom:-26px;white-space:nowrap;
- background:#fff;color:#171717;font-size:10px;line-height:1.15;
- padding:4px 6px;border:1px solid #e8e8e8;
- letter-spacing:0;opacity:0;transition:opacity .15s ease
+ position:absolute;left:0;bottom:-35px;z-index:2;
+ max-width:260px;white-space:nowrap;
+ background:#fff;color:#171717;font-size:12px;line-height:1.15;
+ padding:7px 10px;border:0;
+ box-shadow:0 5px 15px rgba(0,0,0,.09);
+ letter-spacing:-.012em;opacity:0;
+ transform:translateY(7px);
+ transition:opacity .25s ease,transform .35s cubic-bezier(.22,1,.36,1)
 }
 .spatial-home .spatial-card:hover .spatial-caption,
-.spatial-home .spatial-card:focus-visible .spatial-caption{opacity:1}
+.spatial-home .spatial-card:focus-visible .spatial-caption{
+ opacity:1;transform:translateY(0)
+}
 .spatial-home #home-image{display:none}
 .spatial-home .marquee-hint{z-index:6}
 .spatial-home.overprinting .spatial-stage{pointer-events:none}
@@ -305,7 +320,8 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
  .spatial-home .spatial-window{perspective:840px;perspective-origin:50% 43%}
 }
 @media(prefers-reduced-motion:reduce){
- .spatial-home .spatial-card{transition:none}
+ .spatial-home .spatial-card,.spatial-home .spatial-face,
+ .spatial-home .spatial-caption{transition:none}
 }
 
 </style>
@@ -396,16 +412,19 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
   const caption=document.createElement('span');
   caption.className='spatial-caption';
   caption.textContent=item.label+' ↗';
-  card.append(img,caption);
+  const face=document.createElement('span');
+  face.className='spatial-face';
+  face.append(img,caption);
+  card.append(face);
   rack.append(card);
   return card;
  });
  let activeCard=null;
  cards.forEach(card=>{
-  card.addEventListener('mouseenter',()=>{activeCard=card});
-  card.addEventListener('mouseleave',()=>{if(activeCard===card)activeCard=null});
-  card.addEventListener('focus',()=>{activeCard=card});
-  card.addEventListener('blur',()=>{if(activeCard===card)activeCard=null});
+  card.addEventListener('mouseenter',()=>{activeCard=card;layoutDirty=true});
+  card.addEventListener('mouseleave',()=>{if(activeCard===card)activeCard=null;layoutDirty=true});
+  card.addEventListener('focus',()=>{activeCard=card;layoutDirty=true});
+  card.addEventListener('blur',()=>{if(activeCard===card)activeCard=null;layoutDirty=true});
  });
  let phase=.25,velocity=0,gesture=null,ignoreClickUntil=0,hovered=false;
  let paused=prefersReduced.matches,lastTime=performance.now();
@@ -438,9 +457,9 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
    x0:w*(mobile?.32:tablet?.30:.315),
    y0:h*(mobile?.72:tablet?.73:.72),
    // Compress the card-to-card gaps without flattening the diagonal.
-   dx:w*(mobile?.025:tablet?.0175:.014),
-   dy:h*(mobile?.026:tablet?.021:.019),
-   dz:mobile?10:tablet?12:13,
+   dx:w*(mobile?.022:tablet?.0155:.0123),
+   dy:h*(mobile?.023:tablet?.019:.017),
+   dz:mobile?9:tablet?11:12,
    angle:mobile?-28:-32,
    skew:mobile?18:22
   };
