@@ -476,10 +476,10 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
  let rushStart=null;
  let rushFinished=!document.documentElement.classList.contains('intro-sequencing');
  let rushOffset=rushFinished?0:100;
- const rushDuration=2250;
- // First spin: roll 24 prints rapidly past the viewer, then brake gently.
- // Spin and incoming row share the same timeline for a seamless handoff.
- const initialSpinDistance=24;
+ // Triple-length intro spin. It rolls in the same visual direction as the
+ // entering archive, completes multiple passes, then gently decelerates.
+ const rushDuration=6750;
+ const initialSpinDistance=144;
  let initialSpinPassed=0;
  function beginRush(){
   if(rushFinished||rushStart!==null)return;
@@ -581,8 +581,9 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
    const easedSpin=initialSpinDistance*(1-Math.pow(1-t,2.6));
    const spinStep=easedSpin-initialSpinPassed;
    initialSpinPassed=easedSpin;
-   phase-=spinStep;
-   targetPhase-=spinStep;
+   // Match the gallery's forward drift direction (increasing phase).
+   phase+=spinStep;
+   targetPhase+=spinStep;
    layoutDirty=true;
    if(t>=1){
     rushStart=null;rushFinished=true;rushOffset=0;
