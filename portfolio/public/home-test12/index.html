@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="/style.css">
 <script>
 if(!location.hash && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
- document.documentElement.classList.add('intro-pending');
+ document.documentElement.classList.add('intro-pending','intro-sequencing');
 }
 </script>
 <style>
@@ -317,6 +317,23 @@ html.intro-pending .marquee-home .motion-toggle{
 .spatial-home .marquee-hint{z-index:6}
 .spatial-home.overprinting .spatial-stage{pointer-events:none}
 html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
+/* Paragraph settles, sidebar reveals, then the print deck rushes in. */
+html.intro-sequencing .spatial-home .home-copy>.group{
+ opacity:0;transform:translateY(14px);pointer-events:none;
+ transition:opacity .62s ease,transform .62s cubic-bezier(.2,.8,.2,1)
+}
+html.intro-sequencing .spatial-home .home-copy>.group:nth-of-type(2){transition-delay:140ms}
+html.intro-sequencing .spatial-home .home-copy>.group:nth-of-type(3){transition-delay:280ms}
+html.intro-sequencing.intro-sidebar-revealing .spatial-home .home-copy>.group{
+ opacity:1;transform:translateY(0);pointer-events:auto
+}
+html.intro-sequencing .spatial-home .spatial-stage,
+html.intro-sequencing .spatial-home .marquee-hint{
+ opacity:0;pointer-events:none
+}
+html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
+ opacity:1;pointer-events:auto;transition:opacity .26s ease
+}
 @media(max-width:900px){
  .spatial-home .spatial-stage{top:43%;height:53dvh}
  .spatial-home .spatial-window{perspective:1150px}
@@ -378,7 +395,8 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
  const prefersReduced=matchMedia('(prefers-reduced-motion: reduce)');
  const finePointer=matchMedia('(hover: hover) and (pointer: fine)');
  const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
- const blocked=()=>document.documentElement.classList.contains('intro-pending')||
+ const blocked=()=>document.documentElement.classList.contains('intro-sequencing')||
+  document.documentElement.classList.contains('intro-pending')||
   home.classList.contains('overprinting')||overlay.classList.contains('open');
  const imagePool=[];
  const projectImgs=DATA.projects.map(p=>({
@@ -414,7 +432,7 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
   const img=document.createElement('img');
   img.src=encodeURI(item.src);
   img.alt=item.alt;img.draggable=false;
-  img.loading=i<10?'eager':'lazy';img.decoding='async';
+  img.loading=i<36?'eager':'lazy';img.decoding='async';
   const caption=document.createElement('span');
   caption.className='spatial-caption';
   caption.textContent=item.label+' ↗';
@@ -454,6 +472,21 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
  const len=cards.length;
  let targetPhase=phase;
  let geometry=null,layoutDirty=true,lastRendered=NaN;
+ // Posters start beyond the far end; the deck decelerates into place.
+ let rushStart=null;
+ let rushFinished=!document.documentElement.classList.contains('intro-sequencing');
+ let rushOffset=rushFinished?0:100;
+ const rushDuration=2250;
+ function beginRush(){
+  if(rushFinished||rushStart!==null)return;
+  rushOffset=(geometry?geometry.visible:48)+8;
+  rushStart=performance.now();
+  document.documentElement.classList.add('intro-posters-revealing');
+  layoutDirty=true;
+ }
+ function cancelRush(){
+  rushStart=null;rushFinished=true;rushOffset=0;layoutDirty=true;
+ }
  // Hit regions are calculated from the same perspective as the moving deck.
  // At the far end, the exposed edges are narrower than the 3D button layers;
  // screen-space picking keeps those posters hoverable and clickable.
@@ -495,7 +528,7 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
   projectedCards.length=0;
   cards.forEach((card,i)=>{
    // Wrap only after a card has fully left the rendered range.
-   const k=((i+phase)%len+len)%len;
+   const k=((i+phase)%len+len)%len+rushOffset;
    if(k>visible+1.2){
     if(card.style.visibility!=='hidden'){
      card.style.visibility='hidden';
@@ -535,6 +568,16 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
  function tick(now){
   const dt=Math.min(.05,Math.max(0,(now-lastTime)/1000));
   lastTime=now;
+  if(rushStart!==null&&!rushFinished){
+   const t=clamp((now-rushStart)/rushDuration,0,1);
+   rushOffset=((geometry?geometry.visible:48)+8)*Math.pow(1-t,3.4);
+   layoutDirty=true;
+   if(t>=1){
+    rushStart=null;rushFinished=true;rushOffset=0;
+    document.documentElement.classList.remove(
+     'intro-sequencing','intro-sidebar-revealing','intro-posters-revealing');
+   }
+  }
   const isBlocked=blocked();
   if(!gesture&&!isBlocked&&!paused){
    // Smooth constant drift and momentum, without per-frame geometry changes.
@@ -693,9 +736,12 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
   const motionQuery=window.matchMedia('(prefers-reduced-motion: reduce)');
   let completed=false;
   const skip=()=>{
-   if(completed)return;
+   if(!root.classList.contains('intro-pending')&&
+      !root.classList.contains('intro-sequencing'))return;
    completed=true;
-   root.classList.remove('intro-pending','intro-finishing','intro-booted');
+   cancelRush();
+   root.classList.remove('intro-pending','intro-finishing','intro-booted',
+    'intro-sequencing','intro-sidebar-revealing','intro-posters-revealing');
    typed.textContent='';
   };
   if(!original||!target||!typed||!stageText||motionQuery.matches||location.hash){
@@ -716,7 +762,17 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
    stageText.style.width=rect.width+'px';
    typed.textContent=original.textContent;
    root.classList.add('intro-finishing');
-   setTimeout(skip,transitionMs+80);
+   setTimeout(()=>{
+    if(completed)return;
+    root.classList.remove('intro-pending','intro-finishing','intro-booted');
+    typed.textContent='';
+    root.classList.add('intro-sidebar-revealing');
+    setTimeout(()=>{
+     if(completed||!root.classList.contains('intro-sequencing'))return;
+     beginRush();
+     completed=true;
+    },1100);
+   },transitionMs+80);
   }
   function tick(now){
    if(completed)return;
