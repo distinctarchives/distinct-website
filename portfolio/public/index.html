@@ -13,11 +13,11 @@
 <link rel="stylesheet" href="/style.css">
 <script>
 if(!location.hash && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
- document.documentElement.classList.add('intro-pending');
+ document.documentElement.classList.add('intro-pending','intro-sequencing');
 }
 </script>
 <style>
-/* Distinct Archives — editorial moving archive homepage. */
+/* Distinct Archives — interactive spatial archive homepage. */
 :root{--studio-pink:#f7a0c8}
 html,body{height:100%;overscroll-behavior:none}
 #home.marquee-home{position:fixed;inset:0;width:100%;height:100dvh;min-height:0;background:#fff;overflow:hidden}
@@ -236,6 +236,117 @@ html.intro-pending .marquee-home .motion-toggle{
  .marquee-home .motion-toggle{display:inline-block}
  .marquee-home .marquee-item{transition:none}
 }
+
+/* Distinct Archives — editorial 3D print archive:
+   a dense long diagonal stack, large visible print faces up front,
+   receding toward the upper-right with no artificial white borders.
+   Continuous motion and full-bleed printed images. */
+/* The wide editorial header must not mask the thin poster edges at the
+   distant end of the row. Navigation buttons remain fully interactive. */
+.spatial-home .home-copy{pointer-events:none}
+.spatial-home .home-copy button,
+.spatial-home .home-copy a{pointer-events:auto}
+.spatial-home .spatial-stage{
+ top:27%;height:69dvh;display:block;z-index:2;
+ pointer-events:none;overflow:visible
+}
+.spatial-home .spatial-window{
+ position:absolute;inset:0;overflow:visible;pointer-events:auto;
+ perspective:1450px;perspective-origin:50% 44%;
+ transform-style:preserve-3d;touch-action:none;
+ user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab
+}
+.spatial-home .spatial-window.dragging,
+.spatial-home .spatial-window.dragging *{cursor:grabbing!important}
+.spatial-home .spatial-rack{
+ position:absolute;inset:0;transform-style:preserve-3d;pointer-events:none
+}
+.spatial-home .spatial-card{
+ display:block;position:absolute;top:50%;left:50%;
+ width:var(--card-width,150px);height:var(--card-height,190px);
+ margin-left:calc(var(--card-width,150px)*-.5);
+ margin-top:calc(var(--card-height,190px)*-.5);
+ padding:0;border:0;border-radius:0;
+ background:transparent;color:#171717;overflow:visible;
+ transform-origin:center;transform-style:preserve-3d;
+ backface-visibility:hidden;will-change:transform,opacity;
+ pointer-events:auto;cursor:pointer
+}
+/* The button keeps a steady hit area; only the artwork floats on hover. */
+.spatial-home .spatial-face{
+ position:relative;display:block;width:100%;height:100%;
+ transform:translate3d(0,0,0);transform-origin:50% 60%;
+ transform-style:preserve-3d;pointer-events:none;
+ box-shadow:1px 1px 0 rgba(15,15,15,.22),
+            3px 4px 6px rgba(15,15,15,.13),
+            10px 15px 24px rgba(15,15,15,.11);
+ transition:transform .43s cubic-bezier(.22,1,.36,1),
+            box-shadow .4s ease;
+}
+.spatial-home .spatial-card img{
+ display:block;width:100%;height:100%;object-fit:cover;
+ user-select:none;-webkit-user-select:none;-webkit-user-drag:none;
+ backface-visibility:hidden;pointer-events:none
+}
+.spatial-home .spatial-card.is-hovered .spatial-face,
+.spatial-home .spatial-card:focus-visible .spatial-face{
+ /* Pure vertical lift — no forward movement, depth change, or scaling. */
+ transform:translate3d(0,calc(-1 * clamp(76px,11vh,125px)),0);
+ box-shadow:2px 3px 0 rgba(15,15,15,.19),
+            9px 14px 20px rgba(15,15,15,.17),
+            20px 32px 42px rgba(15,15,15,.20)
+}
+.spatial-home .spatial-card:focus-visible{
+ outline:3px solid #f7a0c8;outline-offset:4px
+}
+.spatial-home .spatial-card .spatial-caption{
+ position:absolute;left:0;bottom:-35px;z-index:2;
+ max-width:260px;white-space:nowrap;
+ background:#fff;color:#171717;font-size:12px;line-height:1.15;
+ padding:7px 10px;border:0;
+ box-shadow:0 5px 15px rgba(0,0,0,.09);
+ letter-spacing:-.012em;opacity:0;
+ transform:translateY(7px);
+ transition:opacity .25s ease,transform .35s cubic-bezier(.22,1,.36,1)
+}
+.spatial-home .spatial-card.is-hovered .spatial-caption,
+.spatial-home .spatial-card:focus-visible .spatial-caption{
+ opacity:1;transform:translateY(0)
+}
+.spatial-home #home-image{display:none}
+.spatial-home .marquee-hint{z-index:6}
+.spatial-home.overprinting .spatial-stage{pointer-events:none}
+html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
+/* Paragraph settles, sidebar reveals, then the print deck rushes in. */
+html.intro-sequencing .spatial-home .home-copy>.group{
+ opacity:0;transform:translateY(14px);pointer-events:none;
+ transition:opacity .62s ease,transform .62s cubic-bezier(.2,.8,.2,1)
+}
+html.intro-sequencing .spatial-home .home-copy>.group:nth-of-type(2){transition-delay:140ms}
+html.intro-sequencing .spatial-home .home-copy>.group:nth-of-type(3){transition-delay:280ms}
+html.intro-sequencing.intro-sidebar-revealing .spatial-home .home-copy>.group{
+ opacity:1;transform:translateY(0);pointer-events:auto
+}
+html.intro-sequencing .spatial-home .spatial-stage,
+html.intro-sequencing .spatial-home .marquee-hint{
+ opacity:0;pointer-events:none
+}
+html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
+ opacity:1;pointer-events:auto;transition:opacity .26s ease
+}
+@media(max-width:900px){
+ .spatial-home .spatial-stage{top:43%;height:53dvh}
+ .spatial-home .spatial-window{perspective:1150px}
+}
+@media(max-width:500px){
+ .spatial-home .spatial-stage{top:51%;height:44dvh}
+ .spatial-home .spatial-window{perspective:840px;perspective-origin:50% 43%}
+}
+@media(prefers-reduced-motion:reduce){
+ .spatial-home .spatial-card,.spatial-home .spatial-face,
+ .spatial-home .spatial-caption{transition:none}
+}
+
 </style>
 </head>
 <body>
@@ -243,7 +354,7 @@ html.intro-pending .marquee-home .motion-toggle{
  <span class="intro-crt-boot" aria-hidden="true"></span>
  <p class="intro-screen-text" id="intro-screen-text"><span id="intro-typed"></span><span class="intro-caret"></span></p>
 </div>
-<main id="home" class="home marquee-home">
+<main id="home" class="home marquee-home spatial-home">
  <div class="home-copy">
   <p class="intro"><span class="intro-original">Distinct Archives is an independent design practice working across visual identities, art direction, editorial design and digital experiences. The practice develops visual systems for people, places and ideas.</span></p>
   <div class="group">
@@ -258,27 +369,12 @@ html.intro-pending .marquee-home .motion-toggle{
   </div>
   <div class="group"><p>Distinct Archives<br>Independent brand design practice</p></div>
  </div>
- <div class="marquee-stage">
-  <div class="marquee-viewport" id="marquee-viewport" aria-label="Moving images from projects and visual archive">
-   <div class="marquee-track" id="marquee-track">
-    <div class="marquee-set" id="marquee-set">
-     <button class="marquee-item" style="--w:175px;--h:220px;--y:-29px;--rot:-1.1deg" data-project="naif" aria-label="Open Naïf project"><img src="/Distinct_Framer_Media/naif/Image-1.jpg" alt="Naïf — visual identity" draggable="false"><span class="image-caption">Naïf <span>↗</span></span></button>
-     <button class="marquee-item" style="--w:115px;--h:169px;--y:48px;--rot:1.4deg" data-archive="2" aria-label="Open archive image 036"><img src="/Distinct_Framer_Media/036/Image.png" alt="Visual archive image 036" draggable="false"><span class="image-caption">Archive / 036 <span>↗</span></span></button>
-     <button class="marquee-item" style="--w:244px;--h:178px;--y:-47px;--rot:-.6deg" data-project="nate" aria-label="Open Nathaniel Earl project"><img src="/Distinct_Framer_Media/nate/Featured-Image.png" alt="Nathaniel Earl — project artwork" draggable="false"><span class="image-caption">Nathaniel Earl <span>↗</span></span></button>
-     <button class="marquee-item" style="--w:171px;--h:240px;--y:22px;--rot:.8deg" data-archive="7" aria-label="Open archive image 031"><img src="/Distinct_Framer_Media/031/Image.png" alt="Visual archive image 031" draggable="false"><span class="image-caption">Archive / 031 <span>↗</span></span></button>
-     <button class="marquee-item" style="--w:212px;--h:165px;--y:-8px;--rot:-1.2deg" data-project="wna" aria-label="Open Woodstock New Age project"><img src="/Distinct_Framer_Media/wna/Image-1.png" alt="Woodstock New Age — visual design" draggable="false"><span class="image-caption">Woodstock New Age <span>↗</span></span></button>
-     <button class="marquee-item" style="--w:148px;--h:207px;--y:40px;--rot:.5deg" data-archive="12" aria-label="Open archive image 026"><img src="/Distinct_Framer_Media/026/Image.png" alt="Visual archive image 026" draggable="false"><span class="image-caption">Archive / 026 <span>↗</span></span></button>
-     <button class="marquee-item" style="--w:180px;--h:236px;--y:-39px;--rot:1deg" data-project="kombucha" aria-label="Open Kombucha project"><img src="/Distinct_Framer_Media/kombucha/Featured-Image.png" alt="Kombucha — packaging design" draggable="false"><span class="image-caption">Kombucha <span>↗</span></span></button>
-     <button class="marquee-item" style="--w:124px;--h:165px;--y:34px;--rot:-1.3deg" data-archive="19" aria-label="Open archive image 019"><img src="/Distinct_Framer_Media/019/Image.jpg" alt="Visual archive image 019" draggable="false"><span class="image-caption">Archive / 019 <span>↗</span></span></button>
-     <button class="marquee-item" style="--w:205px;--h:169px;--y:-38px;--rot:.5deg" data-project="xine" aria-label="Open Xine project"><img src="/Distinct_Framer_Media/xine/Featured-Image.png" alt="Xine — graphic design" draggable="false"><span class="image-caption">Xine <span>↗</span></span></button>
-     <button class="marquee-item" style="--w:138px;--h:228px;--y:15px;--rot:1.2deg" data-archive="27" aria-label="Open archive image 011"><img src="/Distinct_Framer_Media/011/Image.png" alt="Visual archive image 011" draggable="false"><span class="image-caption">Archive / 011 <span>↗</span></span></button>
-     <button class="marquee-item" style="--w:186px;--h:232px;--y:-28px;--rot:-.8deg" data-project="naif" aria-label="Open Naïf project"><img src="/Distinct_Framer_Media/naif/Image-2.jpg" alt="Naïf — project photograph" draggable="false"><span class="image-caption">Naïf <span>↗</span></span></button>
-     <button class="marquee-item" style="--w:195px;--h:148px;--y:39px;--rot:.8deg" data-archive="32" aria-label="Open archive image 006"><img src="/Distinct_Framer_Media/006/Image.png" alt="Visual archive image 006" draggable="false"><span class="image-caption">Archive / 006 <span>↗</span></span></button>
-    </div>
-   </div>
+
+ <div class="marquee-stage spatial-stage">
+  <div class="spatial-window" id="spatial-window" aria-label="One diagonal row of stacked project posters and archive prints. Scroll, drag or swipe to explore.">
+   <div class="spatial-rack" id="spatial-rack-0"></div>
   </div>
  </div>
-
  <div class="marquee-hint">Swipe or scroll to spin<br>Tap an image to explore</div>
  <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Play motion</button>
  <button id="home-image" class="home-image" type="button" aria-label="Open featured project" tabindex="-1"><img src="/Distinct_Framer_Media/naif/Thumbnail-Image.png" alt=""></button>
@@ -291,194 +387,341 @@ html.intro-pending .marquee-home .motion-toggle{
 <script src="/app.js"></script>
 <script>
 (function(){
- const track=document.getElementById('marquee-track');
- const set=document.getElementById('marquee-set');
- const viewport=document.getElementById('marquee-viewport');
+
  const home=document.getElementById('home');
  const overlay=document.getElementById('overlay');
+ const viewport=document.getElementById('spatial-window');
  const toggle=document.getElementById('motion-toggle');
- const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
- const finePointer=window.matchMedia('(hover: hover) and (pointer: fine)');
- const duplicate=set.cloneNode(true);
- duplicate.removeAttribute('id');
- duplicate.setAttribute('aria-hidden','true');
- duplicate.querySelectorAll('button').forEach(button=>button.setAttribute('tabindex','-1'));
- track.appendChild(duplicate);
-
- let width=Math.max(1,set.getBoundingClientRect().width);
- let position=0,velocity=0;
- let hovered=false,gesture=null;
- let ignoreClickUntil=0,paused=reduceMotion.matches;
- let lastFrame=performance.now();
-
- const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
- const wrap=n=>{const r=n%width;return r>0?r-width:r;};
- const refreshWidth=()=>{
-  const next=set.getBoundingClientRect().width;
-  if(next>1){width=next;position=wrap(position);}
- };
- if('ResizeObserver' in window)new ResizeObserver(refreshWidth).observe(set);
- window.addEventListener('load',refreshWidth,{once:true});
- window.addEventListener('resize',refreshWidth);
-
- const blocked=()=>document.documentElement.classList.contains('intro-pending')||home.classList.contains('overprinting')||overlay.classList.contains('open');
+ const prefersReduced=matchMedia('(prefers-reduced-motion: reduce)');
+ const finePointer=matchMedia('(hover: hover) and (pointer: fine)');
+ const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+ const blocked=()=>document.documentElement.classList.contains('intro-sequencing')||
+  document.documentElement.classList.contains('intro-pending')||
+  home.classList.contains('overprinting')||overlay.classList.contains('open');
+ const imagePool=[];
+ const projectImgs=DATA.projects.map(p=>({
+  p,files:p.media.filter(m=>m.kind==='image')
+ }));
+ // Interleave work and archive prints so one stack feels like a real archive.
+ for(let round=0;round<7;round++){
+  projectImgs.forEach(({p,files},j)=>{
+   if(files.length){
+    const m=files[round%files.length];
+    imagePool.push({
+     src:'/'+m.src,alt:p.title+' — project image',
+     label:p.title,project:p.slug
+    });
+   }
+   const aIndex=(round*6+j*7)%DATA.archive.length;
+   const a=DATA.archive[aIndex];
+   imagePool.push({
+    src:'/'+a.src,alt:'Visual archive '+a.title,
+    label:'Archive / '+a.title,archive:aIndex
+   });
+  });
+ }
+ // A single row; all other rack groups have been removed.
+ const rack=document.getElementById('spatial-rack-0');
+ const cards=Array.from({length:60},(_,i)=>{
+  const item=imagePool[(i*9)%imagePool.length];
+  const card=document.createElement('button');
+  card.className='spatial-card';card.type='button';
+  card.setAttribute('aria-label','Open '+item.label);
+  if(item.project)card.dataset.project=item.project;
+  else card.dataset.archive=String(item.archive);
+  const img=document.createElement('img');
+  img.src=encodeURI(item.src);
+  img.alt=item.alt;img.draggable=false;
+  img.loading=i<36?'eager':'lazy';img.decoding='async';
+  const caption=document.createElement('span');
+  caption.className='spatial-caption';
+  caption.textContent=item.label+' ↗';
+  const face=document.createElement('span');
+  face.className='spatial-face';
+  face.append(img,caption);
+  card.append(face);
+  rack.append(card);
+  return card;
+ });
+ let activeCard=null;
+ function setActiveCard(card){
+  if(activeCard===card)return;
+  if(activeCard)activeCard.classList.remove('is-hovered');
+  activeCard=card;
+  if(activeCard)activeCard.classList.add('is-hovered');
+  layoutDirty=true;
+ }
+ cards.forEach(card=>{
+  card.addEventListener('focus',()=>setActiveCard(card));
+  card.addEventListener('blur',()=>{if(activeCard===card)setActiveCard(null)});
+ });
+ let phase=.25,velocity=0,gesture=null,ignoreClickUntil=0,hovered=false;
+ let paused=prefersReduced.matches,lastTime=performance.now();
  const updateToggle=()=>{
   toggle.textContent=paused?'Play motion':'Pause motion';
   toggle.setAttribute('aria-pressed',String(!paused));
   home.classList.toggle('motion-enabled',!paused);
  };
  updateToggle();
- toggle.addEventListener('click',()=>{
-  paused=!paused;
-  if(paused)velocity=0;
-  refreshWidth();updateToggle();
+ toggle.addEventListener('click',()=>{paused=!paused;velocity=0;updateToggle()});
+ if(prefersReduced.addEventListener)prefersReduced.addEventListener('change',e=>{
+  paused=e.matches;velocity=0;updateToggle();
  });
- if('addEventListener' in reduceMotion)reduceMotion.addEventListener('change',e=>{
-  paused=e.matches;velocity=0;updateToggle();refreshWidth();
- });
-
- function frame(now){
-  const dt=Math.min(.05,Math.max(0,(now-lastFrame)/1000));
-  lastFrame=now;
-  if(!gesture&&!blocked()&&!paused){
-   // Approximately 28 seconds per full set, with additional momentum from gestures.
-   const autoRun=!(finePointer.matches&&hovered)&&!(finePointer.matches&&viewport.contains(document.activeElement));
-   const autoplay=autoRun?-width/28:0;
-   position=wrap(position+(autoplay+velocity)*dt);
-   velocity*=Math.exp(-3.1*dt);
-   if(Math.abs(velocity)<.5)velocity=0;
-  }
-  track.style.transform='translate3d('+position.toFixed(2)+'px,0,0)';
-  requestAnimationFrame(frame);
+ // Single uninterrupted perspective rack. All cards keep their size and
+ // orientation; no mid-stream layout swaps, scaling or split-stack jumps.
+ const len=cards.length;
+ let targetPhase=phase;
+ let geometry=null,layoutDirty=true,lastRendered=NaN;
+ // Posters start beyond the far end; the deck decelerates into place.
+ let rushStart=null;
+ let rushFinished=!document.documentElement.classList.contains('intro-sequencing');
+ let rushOffset=rushFinished?0:100;
+ const rushDuration=2250;
+ function beginRush(){
+  if(rushFinished||rushStart!==null)return;
+  rushOffset=(geometry?geometry.visible:48)+8;
+  rushStart=performance.now();
+  document.documentElement.classList.add('intro-posters-revealing');
+  layoutDirty=true;
  }
- requestAnimationFrame(frame);
-
- // Hover pauses automatic drift on desktop only. Touchscreens keep drifting
- // after tapping an image, rather than treating touch focus as a mouse hover.
+ function cancelRush(){
+  rushStart=null;rushFinished=true;rushOffset=0;layoutDirty=true;
+ }
+ // Hit regions are calculated from the same perspective as the moving deck.
+ // At the far end, the exposed edges are narrower than the 3D button layers;
+ // screen-space picking keeps those posters hoverable and clickable.
+ const projectedCards=[];
+ function measure(){
+  const w=viewport.clientWidth,h=viewport.clientHeight;
+  if(!w||!h)return;
+  const mobile=w<600,tablet=w>=600&&w<950;
+  // The mockup has a near-square foreground print and a long physical
+  // deck receding from the lower-left to the upper-right. Keep the
+  // paper edges dense, while expanding the full diagonal silhouette.
+  const cw=mobile?Math.min(127,w*.34):tablet?Math.min(174,w*.22):Math.min(250,w*.15);
+  const ch=Math.round(cw*(mobile?1.12:1.07));
+  geometry={
+   w,h,cw,ch,visible:mobile?22:tablet?36:48,
+   x0:w*(mobile?.275:tablet?.27:.27),
+   y0:h*(mobile?.74:tablet?.77:.80),
+   // Extend the diagonal line without loosening the printed-paper stack.
+   dx:w*(mobile?.024:tablet?.016:.013),
+   dy:h*(mobile?.020:tablet?.018:.015),
+   dz:mobile?9:tablet?11:12,
+   angle:mobile?-28:-32,
+   skew:mobile?18:22
+  };
+  cards.forEach(card=>{
+   card.style.setProperty('--card-width',cw+'px');
+   card.style.setProperty('--card-height',ch+'px');
+  });
+  layoutDirty=true;
+ }
+ if('ResizeObserver' in window)new ResizeObserver(measure).observe(viewport);
+ window.addEventListener('resize',measure,{passive:true});
+ measure();
+ function layout(){
+  const g=geometry;if(!g)return;
+  const {w,h,cw,ch,visible,x0,y0,dx,dy,dz,angle,skew}=g;
+  const depth=w<=500?840:w<=900?1150:1450;
+  const originY=h*(w<=500?.43:.44);
+  projectedCards.length=0;
+  cards.forEach((card,i)=>{
+   // Wrap only after a card has fully left the rendered range.
+   const k=((i+phase)%len+len)%len+rushOffset;
+   if(k>visible+1.2){
+    if(card.style.visibility!=='hidden'){
+     card.style.visibility='hidden';
+     card.style.pointerEvents='none';
+    }
+    return;
+   }
+   if(card.style.visibility!=='visible')card.style.visibility='visible';
+   const fadeIn=clamp(k/.55,0,1);
+   // Distant prints retain hit areas until the very end of the fade.
+   const fadeOut=clamp((visible+1.2-k)/1.2,0,1);
+   const opacity=Math.min(fadeIn,fadeOut);
+   const x=x0+k*dx-w*.5;
+   const y=y0-k*dy-h*.5;
+   const z=120-k*dz;
+   const projection=depth/(depth-z);
+   projectedCards.push({
+    card,k,
+    x:w*.5+(x)*projection,
+    y:originY+(y+h*.5-originY)*projection,
+    width:cw*projection,
+    height:ch*projection
+   });
+   card.style.transform='translate3d('+
+    x.toFixed(2)+'px,'+y.toFixed(2)+'px,'+z.toFixed(2)+
+    'px) rotateY('+angle+'deg) skewY('+skew+'deg) rotateX(5deg)';
+   card.style.opacity=opacity.toFixed(3);
+   const rank=Math.round(600-k*12);
+   const zIndex=card===activeCard?900:rank;
+   if(card.style.zIndex!==String(zIndex))card.style.zIndex=String(zIndex);
+   const events=opacity>.06?'auto':'none';
+   if(card.style.pointerEvents!==events)card.style.pointerEvents=events;
+  });
+  lastRendered=phase;
+  layoutDirty=false;
+ }
+ function tick(now){
+  const dt=Math.min(.05,Math.max(0,(now-lastTime)/1000));
+  lastTime=now;
+  if(rushStart!==null&&!rushFinished){
+   const t=clamp((now-rushStart)/rushDuration,0,1);
+   rushOffset=((geometry?geometry.visible:48)+8)*Math.pow(1-t,3.4);
+   layoutDirty=true;
+   if(t>=1){
+    rushStart=null;rushFinished=true;rushOffset=0;
+    document.documentElement.classList.remove(
+     'intro-sequencing','intro-sidebar-revealing','intro-posters-revealing');
+   }
+  }
+  const isBlocked=blocked();
+  if(!gesture&&!isBlocked&&!paused){
+   // Smooth constant drift and momentum, without per-frame geometry changes.
+   if(!(finePointer.matches&&hovered)){
+    targetPhase+=dt*(.19+velocity);
+   }
+   velocity*=Math.exp(-3.4*dt);
+   if(Math.abs(velocity)<.004)velocity=0;
+  }
+  // Damping smooths wheel and touch event bursts. Remains frame-rate independent.
+  const response=1-Math.exp(-16*dt);
+  phase+=(targetPhase-phase)*response;
+  if(layoutDirty||Math.abs(phase-lastRendered)>.00012)layout();
+  requestAnimationFrame(tick);
+ }
+ requestAnimationFrame(tick);
+ function pickPoster(clientX,clientY){
+  const bounds=viewport.getBoundingClientRect();
+  const x=clientX-bounds.left,y=clientY-bounds.top;
+  if(x<0||x>bounds.width||y<0||y>bounds.height)return null;
+  let best=null,bestScore=Infinity;
+  // The first prints can use the browser's normal hit testing. The
+  // later prints use their exposed diagonal slices, not their covered DOM box.
+  for(const slot of projectedCards){
+   if(slot.k<11||slot.k>geometry.visible+.5)continue;
+   const dx=x-slot.x,dy=y-slot.y;
+   if(Math.abs(dx)>slot.width*.62+8 ||
+      Math.abs(dy)>slot.height*.73+15)continue;
+   const score=Math.abs(dx)/Math.max(10,geometry.dx*.72)+
+               Math.abs(dy)/Math.max(36,slot.height)*.22;
+   if(score<bestScore){best=slot.card;bestScore=score}
+  }
+  return best;
+ }
  viewport.addEventListener('pointerenter',e=>{
-  if(finePointer.matches&&e.pointerType==='mouse')hovered=true;
+  if(e.pointerType==='mouse'&&finePointer.matches)hovered=true;
  });
+ viewport.addEventListener('pointermove',e=>{
+  if(e.pointerType==='touch'||gesture||blocked())return;
+  const selected=pickPoster(e.clientX,e.clientY)||
+   e.target.closest('.spatial-card');
+  setActiveCard(selected);
+ },{passive:true});
  viewport.addEventListener('pointerleave',e=>{
-  if(e.pointerType==='mouse')hovered=false;
- });
-
- // Mouse wheel / trackpad: both vertical and horizontal scroll spin the reel.
- viewport.addEventListener('wheel',e=>{
-  if(blocked()||paused)return;
-  e.preventDefault();
-  const axis=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
-  const factor=e.deltaMode===1?16:e.deltaMode===2?viewport.clientWidth:1;
-  const delta=clamp(axis*factor,-220,220);
-  position=wrap(position-delta*.65);
-  velocity=clamp(velocity-delta*7,-2500,2500);
- },{passive:false});
-
- function beginGesture(id,x,y){
-  if(blocked())return;
-  gesture={id,startX:x,startY:y,lastX:x,lastY:y,time:performance.now(),speed:0,axis:null,moving:false};
- }
- function moveGesture(x,y,e){
-  if(!gesture)return;
-  const now=performance.now(),dx=x-gesture.lastX,dy=y-gesture.lastY;
-  if(!gesture.moving){
-   const totalX=x-gesture.startX,totalY=y-gesture.startY;
-   if(Math.hypot(totalX,totalY)<7)return;
-   gesture.moving=true;
-   gesture.axis=Math.abs(totalX)>=Math.abs(totalY)*.9?'x':'y';
-   velocity=0;
-   viewport.classList.add('is-dragging');
+  if(e.pointerType==='mouse'){
+   hovered=false;
+   if(!viewport.contains(document.activeElement))setActiveCard(null);
   }
-  // In the fixed mobile layout, vertical swipes also browse the horizontal reel.
-  const movement=gesture.axis==='x'?dx:dy*.8;
-  const dt=Math.max(.008,(now-gesture.time)/1000);
-  position=wrap(position+movement);
-  const sample=clamp(movement/dt,-2600,2600);
-  gesture.speed=gesture.speed*.38+sample*.62;
-  gesture.lastX=x;gesture.lastY=y;gesture.time=now;
-  if(e&&e.cancelable)e.preventDefault();
+ });
+ function startDrag(id,x,y){
+  if(blocked())return;
+  gesture={id,startX:x,startY:y,lastX:x,lastY:y,lastTime:performance.now(),speed:0,moved:false};
+  velocity=0;
  }
- function endGesture(){
+ function moveDrag(x,y,e){
   if(!gesture)return;
-  if(gesture.moving){
-   velocity=clamp(gesture.speed,-2300,2300);
+  const dx=x-gesture.lastX,dy=y-gesture.lastY;
+  if(!gesture.moved){
+   if(Math.hypot(x-gesture.startX,y-gesture.startY)<7)return;
+   gesture.moved=true;viewport.classList.add('dragging');
+  }
+  const major=Math.abs(x-gesture.startX)>Math.abs(y-gesture.startY)?dx:-dy;
+  const movement=-major*.016;
+  const now=performance.now(),dt=Math.max(.008,(now-gesture.lastTime)/1000);
+  targetPhase+=movement;
+  gesture.speed=gesture.speed*.55+(movement/dt)*.45;
+  gesture.lastTime=now;gesture.lastX=x;gesture.lastY=y;
+  if(e?.cancelable)e.preventDefault();
+ }
+ function endDrag(){
+  if(!gesture)return;
+  if(gesture.moved){
+   velocity=clamp(gesture.speed,-4,4);
    ignoreClickUntil=performance.now()+550;
-   viewport.classList.remove('is-dragging');
+   viewport.classList.remove('dragging');
   }
   gesture=null;
  }
- viewport.addEventListener('click',e=>{
-  if(performance.now()>=ignoreClickUntil)return;
-  e.preventDefault();e.stopImmediatePropagation();
-  ignoreClickUntil=0;
- },true);
-
- // Mouse and pen use pointer events; mobile Safari uses native touch events.
+ viewport.addEventListener('wheel',e=>{
+  if(blocked())return;
+  e.preventDefault();
+  const delta=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
+  const d=clamp(delta*(e.deltaMode===1?15:1),-100,100);
+  targetPhase+=d*.007;
+  velocity=clamp(velocity+d*.012,-4,4);
+ },{passive:false});
  viewport.addEventListener('pointerdown',e=>{
   if(e.pointerType==='touch'||!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0))return;
-  ignoreClickUntil=0;beginGesture(e.pointerId,e.clientX,e.clientY);
+  startDrag(e.pointerId,e.clientX,e.clientY);
  });
  viewport.addEventListener('pointermove',e=>{
-  if(!gesture||e.pointerType==='touch'||gesture.id!==e.pointerId)return;
-  if(!gesture.moving&&Math.hypot(e.clientX-gesture.startX,e.clientY-gesture.startY)<7)return;
-  moveGesture(e.clientX,e.clientY,e);
-  if(gesture?.moving&& !viewport.hasPointerCapture(e.pointerId)){
+  if(e.pointerType==='touch'||!gesture||gesture.id!==e.pointerId)return;
+  moveDrag(e.clientX,e.clientY,e);
+  if(gesture?.moved&&!viewport.hasPointerCapture(e.pointerId)){
    try{viewport.setPointerCapture(e.pointerId)}catch(_){}
   }
  });
  viewport.addEventListener('pointerup',e=>{
   if(e.pointerType==='touch'||!gesture||gesture.id!==e.pointerId)return;
-  endGesture();
+  endDrag();
   try{if(viewport.hasPointerCapture(e.pointerId))viewport.releasePointerCapture(e.pointerId)}catch(_){}
  });
- viewport.addEventListener('pointercancel',e=>{if(e.pointerType!=='touch')endGesture();});
- viewport.addEventListener('lostpointercapture',()=>{if(gesture)endGesture();});
-
- // Dedicated touch handling avoids the touch-action:pan-y cancellation that
- // previously prevented dragging on iPhones and other mobile browsers.
+ viewport.addEventListener('pointercancel',e=>{if(e.pointerType!=='touch')endDrag()});
+ viewport.addEventListener('lostpointercapture',()=>{if(gesture)endDrag()});
+ // Native touch events keep dragging reliable in mobile Safari.
  viewport.addEventListener('touchstart',e=>{
   if(e.touches.length!==1||blocked())return;
-  const touch=e.touches[0];
-  ignoreClickUntil=0;beginGesture(touch.identifier,touch.clientX,touch.clientY);
+  const t=e.touches[0];startDrag(t.identifier,t.clientX,t.clientY);
  },{passive:true});
  viewport.addEventListener('touchmove',e=>{
   if(!gesture||e.touches.length!==1)return;
-  const touch=e.touches[0];
-  if(touch.identifier!==gesture.id)return;
-  moveGesture(touch.clientX,touch.clientY,e);
+  const t=e.touches[0];if(t.identifier!==gesture.id)return;
+  moveDrag(t.clientX,t.clientY,e);
  },{passive:false});
  viewport.addEventListener('touchend',e=>{
   if(!gesture)return;
-  for(const t of e.changedTouches){if(t.identifier===gesture.id){endGesture();break;}}
+  if(Array.from(e.changedTouches).some(t=>t.identifier===gesture.id))endDrag();
  },{passive:true});
- viewport.addEventListener('touchcancel',()=>endGesture(),{passive:true});
-
- // Editorial About/Contact panels dismiss when tapping or clicking outside the text.
- // Keep the navigation usable for switching between the two panels.
+ viewport.addEventListener('touchcancel',endDrag,{passive:true});
+ viewport.addEventListener('click',e=>{
+  if(performance.now()>=ignoreClickUntil)return;
+  e.preventDefault();e.stopImmediatePropagation();
+ },true);
+ viewport.addEventListener('click',e=>{
+  const card=pickPoster(e.clientX,e.clientY)||
+   e.target.closest('.spatial-card');
+  if(!card||blocked())return;
+  if(card.dataset.project){open(card.dataset.project);}
+  else if(card.dataset.archive!==undefined){
+   open('archive');
+   const button=document.querySelector('#overlay-body .archive-grid [data-archive="'+
+    card.dataset.archive+'"]');
+   if(button)button.click();
+  }
+ });
+ // Same outside-click behavior as the current official homepage.
  document.addEventListener('click',e=>{
   if(!home.classList.contains('overprinting'))return;
   const target=e.target;
   if(!(target instanceof Element))return;
   if(target.closest('[data-go="about"],[data-go="contact"]'))return;
   if(target.closest('#overprint-inner h2,#overprint-inner p,#overprint-inner a,#overprint-inner .about-photo'))return;
-  // Consume the background click so it does not also open an underlying project.
-  e.preventDefault();
-  e.stopImmediatePropagation();
-  close();
+  e.preventDefault();e.stopImmediatePropagation();close();
  },true);
-
- track.addEventListener('click',e=>{
-  const button=e.target.closest('button.marquee-item');
-  if(!button)return;
-  if(button.dataset.project){
-   open(button.dataset.project);
-  }else if(button.dataset.archive!==undefined){
-   open('archive');
-   const imageButton=document.querySelector(
-    '#overlay-body .archive-grid [data-archive="'+button.dataset.archive+'"]'
-   );
-   if(imageButton)imageButton.click();
-  }
- });
 
  // Cinematic opening for both desktop and mobile, skipped for reduced motion
  // and direct project/overlay links. The normal paragraph remains in the DOM
@@ -493,9 +736,12 @@ html.intro-pending .marquee-home .motion-toggle{
   const motionQuery=window.matchMedia('(prefers-reduced-motion: reduce)');
   let completed=false;
   const skip=()=>{
-   if(completed)return;
+   if(!root.classList.contains('intro-pending')&&
+      !root.classList.contains('intro-sequencing'))return;
    completed=true;
-   root.classList.remove('intro-pending','intro-finishing','intro-booted');
+   cancelRush();
+   root.classList.remove('intro-pending','intro-finishing','intro-booted',
+    'intro-sequencing','intro-sidebar-revealing','intro-posters-revealing');
    typed.textContent='';
   };
   if(!original||!target||!typed||!stageText||motionQuery.matches||location.hash){
@@ -516,7 +762,17 @@ html.intro-pending .marquee-home .motion-toggle{
    stageText.style.width=rect.width+'px';
    typed.textContent=original.textContent;
    root.classList.add('intro-finishing');
-   setTimeout(skip,transitionMs+80);
+   setTimeout(()=>{
+    if(completed)return;
+    root.classList.remove('intro-pending','intro-finishing','intro-booted');
+    typed.textContent='';
+    root.classList.add('intro-sidebar-revealing');
+    setTimeout(()=>{
+     if(completed||!root.classList.contains('intro-sequencing'))return;
+     beginRush();
+     completed=true;
+    },1100);
+   },transitionMs+80);
   }
   function tick(now){
    if(completed)return;
