@@ -468,7 +468,7 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
   const cw=mobile?Math.min(127,w*.34):tablet?Math.min(174,w*.22):Math.min(250,w*.15);
   const ch=Math.round(cw*(mobile?1.12:1.07));
   geometry={
-   w,h,visible:mobile?22:tablet?36:48,
+   w,h,cw,ch,visible:mobile?22:tablet?36:48,
    x0:w*(mobile?.275:tablet?.27:.27),
    y0:h*(mobile?.74:tablet?.77:.80),
    // Extend the diagonal line without loosening the printed-paper stack.
@@ -489,7 +489,7 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
  measure();
  function layout(){
   const g=geometry;if(!g)return;
-  const {w,h,visible,x0,y0,dx,dy,dz,angle,skew}=g;
+  const {w,h,cw,ch,visible,x0,y0,dx,dy,dz,angle,skew}=g;
   const depth=w<=500?840:w<=900?1150:1450;
   const originY=h*(w<=500?.43:.44);
   projectedCards.length=0;
@@ -516,8 +516,8 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
     card,k,
     x:w*.5+(x)*projection,
     y:originY+(y+h*.5-originY)*projection,
-    width:card.offsetWidth*projection,
-    height:card.offsetHeight*projection
+    width:cw*projection,
+    height:ch*projection
    });
    card.style.transform='translate3d('+
     x.toFixed(2)+'px,'+y.toFixed(2)+'px,'+z.toFixed(2)+
