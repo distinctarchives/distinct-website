@@ -288,10 +288,10 @@ html.intro-pending .marquee-home .motion-toggle{
  user-select:none;-webkit-user-select:none;-webkit-user-drag:none;
  backface-visibility:hidden;pointer-events:none
 }
-.spatial-home .spatial-card:hover .spatial-face,
+.spatial-home .spatial-card.is-hovered .spatial-face,
 .spatial-home .spatial-card:focus-visible .spatial-face{
  /* Pure vertical lift — no forward movement, depth change, or scaling. */
- transform:translate3d(0,calc(-1 * clamp(36px,5.8vh,64px)),0);
+ transform:translate3d(0,calc(-1 * clamp(76px,11vh,125px)),0);
  box-shadow:2px 3px 0 rgba(15,15,15,.19),
             9px 14px 20px rgba(15,15,15,.17),
             20px 32px 42px rgba(15,15,15,.20)
@@ -309,7 +309,7 @@ html.intro-pending .marquee-home .motion-toggle{
  transform:translateY(7px);
  transition:opacity .25s ease,transform .35s cubic-bezier(.22,1,.36,1)
 }
-.spatial-home .spatial-card:hover .spatial-caption,
+.spatial-home .spatial-card.is-hovered .spatial-caption,
 .spatial-home .spatial-card:focus-visible .spatial-caption{
  opacity:1;transform:translateY(0)
 }
@@ -426,11 +426,16 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
   return card;
  });
  let activeCard=null;
+ function setActiveCard(card){
+  if(activeCard===card)return;
+  if(activeCard)activeCard.classList.remove('is-hovered');
+  activeCard=card;
+  if(activeCard)activeCard.classList.add('is-hovered');
+  layoutDirty=true;
+ }
  cards.forEach(card=>{
-  card.addEventListener('mouseenter',()=>{activeCard=card;layoutDirty=true});
-  card.addEventListener('mouseleave',()=>{if(activeCard===card)activeCard=null;layoutDirty=true});
-  card.addEventListener('focus',()=>{activeCard=card;layoutDirty=true});
-  card.addEventListener('blur',()=>{if(activeCard===card)activeCard=null;layoutDirty=true});
+  card.addEventListener('focus',()=>setActiveCard(card));
+  card.addEventListener('blur',()=>{if(activeCard===card)setActiveCard(null)});
  });
  let phase=.25,velocity=0,gesture=null,ignoreClickUntil=0,hovered=false;
  let paused=prefersReduced.matches,lastTime=performance.now();
@@ -449,6 +454,10 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
  const len=cards.length;
  let targetPhase=phase;
  let geometry=null,layoutDirty=true,lastRendered=NaN;
+ // Hit regions are calculated from the same perspective as the moving deck.
+ // At the far end, the exposed edges are narrower than the 3D button layers;
+ // screen-space picking keeps those posters hoverable and clickable.
+ const projectedCards=[];
  function measure(){
   const w=viewport.clientWidth,h=viewport.clientHeight;
   if(!w||!h)return;
@@ -481,6 +490,9 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
  function layout(){
   const g=geometry;if(!g)return;
   const {w,h,visible,x0,y0,dx,dy,dz,angle,skew}=g;
+  const depth=w<=500?840:w<=900?1150:1450;
+  const originY=h*(w<=500?.43:.44);
+  projectedCards.length=0;
   cards.forEach((card,i)=>{
    // Wrap only after a card has fully left the rendered range.
    const k=((i+phase)%len+len)%len;
@@ -499,6 +511,14 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
    const x=x0+k*dx-w*.5;
    const y=y0-k*dy-h*.5;
    const z=120-k*dz;
+   const projection=depth/(depth-z);
+   projectedCards.push({
+    card,k,
+    x:w*.5+(x)*projection,
+    y:originY+(y+h*.5-originY)*projection,
+    width:card.offsetWidth*projection,
+    height:card.offsetHeight*projection
+   });
    card.style.transform='translate3d('+
     x.toFixed(2)+'px,'+y.toFixed(2)+'px,'+z.toFixed(2)+
     'px) rotateY('+angle+'deg) skewY('+skew+'deg) rotateX(5deg)';
@@ -531,11 +551,38 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
   requestAnimationFrame(tick);
  }
  requestAnimationFrame(tick);
+ function pickPoster(clientX,clientY){
+  const bounds=viewport.getBoundingClientRect();
+  const x=clientX-bounds.left,y=clientY-bounds.top;
+  if(x<0||x>bounds.width||y<0||y>bounds.height)return null;
+  let best=null,bestScore=Infinity;
+  // The first prints can use the browser's normal hit testing. The
+  // later prints use their exposed diagonal slices, not their covered DOM box.
+  for(const slot of projectedCards){
+   if(slot.k<11||slot.k>geometry.visible+.5)continue;
+   const dx=x-slot.x,dy=y-slot.y;
+   if(Math.abs(dx)>slot.width*.62+8 ||
+      Math.abs(dy)>slot.height*.73+15)continue;
+   const score=Math.abs(dx)/Math.max(10,geometry.dx*.72)+
+               Math.abs(dy)/Math.max(36,slot.height)*.22;
+   if(score<bestScore){best=slot.card;bestScore=score}
+  }
+  return best;
+ }
  viewport.addEventListener('pointerenter',e=>{
   if(e.pointerType==='mouse'&&finePointer.matches)hovered=true;
  });
+ viewport.addEventListener('pointermove',e=>{
+  if(e.pointerType==='touch'||gesture||blocked())return;
+  const selected=pickPoster(e.clientX,e.clientY)||
+   e.target.closest('.spatial-card');
+  setActiveCard(selected);
+ },{passive:true});
  viewport.addEventListener('pointerleave',e=>{
-  if(e.pointerType==='mouse')hovered=false;
+  if(e.pointerType==='mouse'){
+   hovered=false;
+   if(!viewport.contains(document.activeElement))setActiveCard(null);
+  }
  });
  function startDrag(id,x,y){
   if(blocked())return;
@@ -612,7 +659,8 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
   e.preventDefault();e.stopImmediatePropagation();
  },true);
  viewport.addEventListener('click',e=>{
-  const card=e.target.closest('.spatial-card');
+  const card=pickPoster(e.clientX,e.clientY)||
+   e.target.closest('.spatial-card');
   if(!card||blocked())return;
   if(card.dataset.project){open(card.dataset.project);}
   else if(card.dataset.archive!==undefined){
