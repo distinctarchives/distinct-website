@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" type="image/x-icon" sizes="16x16 32x32" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" media="(prefers-color-scheme: light)" href="/favicon-light-32.png">
+<link rel="icon" type="image/png" sizes="32x32" media="(prefers-color-scheme: dark)" href="/favicon-dark-32.png">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Distinct Archives — independent design practice, selected work and visual archive.">
+<title>Distinct Archives — Selected Work</title>
+<base href="/">
+<link rel="stylesheet" href="/style.css">
+<script>
+if(!location.hash && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+ document.documentElement.classList.add('intro-pending');
+}
+</script>
+<style>
+/* Distinct Archives — editorial moving archive homepage. */
+:root{--studio-pink:#f7a0c8}
+html,body{height:100%;overscroll-behavior:none}
+#home.marquee-home{position:fixed;inset:0;width:100%;height:100dvh;min-height:0;background:#fff;overflow:hidden}
+.marquee-home .home-copy{
+  position:absolute;z-index:6;top:clamp(18px,3vh,32px);left:clamp(15px,2.1vw,37px);
+  width:min(1700px,calc(100vw - 60px));transform:none;font-size:clamp(11px,.91vw,13px);
+  line-height:1.18;letter-spacing:-.01em
+}
+.marquee-home .home-copy .intro{
+ margin:0 0 16px;max-width:1600px;
+ font-size:clamp(20px,1.65vw,25px);line-height:1.16;letter-spacing:-.022em
+}
+.marquee-home .home-copy .group{margin-top:12px}
+.marquee-home .home-copy .group p{margin:0}
+.marquee-home #work-links{display:flex;flex-direction:column;align-items:flex-start}
+.marquee-home #work-links button{white-space:normal;line-height:1.14}
+.marquee-home .marquee-stage{
+ position:absolute;left:0;right:0;top:45.5%;height:min(46vh,410px);
+ z-index:2;display:flex;align-items:center;pointer-events:none;
+}
+.marquee-home .marquee-viewport{
+ position:relative;overflow:hidden;width:100%;height:100%;
+ pointer-events:auto;display:flex;align-items:center;
+ touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab;
+}
+.marquee-home .marquee-track{
+ display:flex;align-items:center;width:max-content;flex:none;
+ animation:none;will-change:transform;transform:translate3d(0,0,0)
+}
+.marquee-home .marquee-viewport.is-dragging,
+.marquee-home .marquee-viewport.is-dragging *{cursor:grabbing!important}
+.marquee-home .marquee-viewport.is-dragging .marquee-item{transition:none}
+.marquee-home .marquee-viewport img{
+ user-select:none;-webkit-user-select:none;-webkit-user-drag:none
+}
+.marquee-home .marquee-set{display:flex;align-items:center;flex:none;width:max-content;padding:18px 0 37px}
+.marquee-home .marquee-item{
+ --y:0px;
+ display:block;flex:none;position:relative;z-index:1;
+ border:0;background:transparent;padding:0;margin:0 0 0 -20px;
+ width:var(--w,190px);height:var(--h,230px);
+ transform:translateY(var(--y)) rotate(var(--rot,0deg));
+ cursor:pointer;transition:transform .26s ease,filter .2s ease;
+}
+.marquee-home .marquee-item:first-child{margin-left:0}
+.marquee-home .marquee-item img{display:block;width:100%;height:100%;object-fit:cover}
+.marquee-home .marquee-item:hover,.marquee-home .marquee-item:focus-visible{
+ z-index:40;transform:translateY(var(--y)) scale(1.065) rotate(0deg);
+ filter:saturate(1.04)
+}
+.marquee-home .marquee-item:focus-visible{outline:2px solid var(--studio-pink);outline-offset:4px}
+.marquee-home .marquee-item .image-caption{
+ position:absolute;left:0;bottom:-24px;max-width:100%;
+ font-size:11px;letter-spacing:-.01em;white-space:nowrap;
+ color:#1b1b1b;background:#fff;padding:3px 5px 3px 0;
+ opacity:0;transform:translateY(3px);transition:opacity .15s ease,transform .15s ease
+}
+.marquee-home .marquee-item:hover .image-caption,
+.marquee-home .marquee-item:focus-visible .image-caption{opacity:1;transform:none}
+.marquee-home .marquee-item .image-caption span{color:var(--studio-pink)}
+.marquee-home .marquee-index{
+ position:absolute;z-index:4;bottom:clamp(17px,3vh,38px);left:clamp(15px,2.1vw,37px);
+ font-size:clamp(10px,.8vw,12px);line-height:1.16;letter-spacing:-.012em;color:#999;
+}
+.marquee-home .marquee-hint{
+ position:absolute;z-index:4;bottom:clamp(17px,3vh,38px);right:clamp(15px,2.1vw,37px);
+ font-size:clamp(10px,.8vw,12px);line-height:1.16;letter-spacing:-.012em;color:#999;text-align:right;
+}
+.marquee-home #home-image{display:none}
+.marquee-home .home-overprint{z-index:9}
+.marquee-home .overprint-close{display:none!important}
+/* About portrait: wide editorial text plus a quiet photographic column. */
+.marquee-home .about-panel{
+ display:grid;grid-template-columns:minmax(0,1.45fr) minmax(220px,.65fr);
+ gap:clamp(24px,4vw,76px);align-items:start;width:100%
+}
+.marquee-home .about-panel .about-copy{
+ min-width:0;font-size:clamp(32px,4.2vw,72px);
+ line-height:1.035;letter-spacing:-.048em
+}
+.marquee-home .about-panel .about-copy h2{margin-bottom:.68em}
+.marquee-home .about-panel .about-photo{
+ margin:0;width:100%;max-width:440px;justify-self:end;position:sticky;top:0
+}
+.marquee-home .about-panel .about-photo img{
+ display:block;width:100%;height:auto;aspect-ratio:1;object-fit:contain
+}
+@media(max-width:800px){
+ .marquee-home .about-panel{grid-template-columns:1fr;gap:25px}
+ .marquee-home .about-panel .about-copy{font-size:clamp(29px,6.2vw,46px)}
+ .marquee-home .about-panel .about-photo{
+  position:static;width:min(78vw,360px);justify-self:center
+ }
+}
+@media(max-width:500px){
+ .marquee-home .about-panel .about-copy{font-size:clamp(27px,7vw,35px)}
+}
+
+.marquee-home.overprinting .marquee-stage{opacity:.1;filter:grayscale(1);transition:opacity .24s ease;pointer-events:none}
+.marquee-home.overprinting .marquee-hint,
+.marquee-home.overprinting .marquee-index{color:#d0d0d0}
+.marquee-home.overprinting .home-copy{z-index:6}
+.marquee-home .marquee-stage .marquee-item:is(:active,:focus-visible) .image-caption{color:var(--studio-pink)}
+
+/* Editorial CRT startup, followed by the original left-aligned typewriter
+   and the transition to the white portfolio. The boot effect is visual only. */
+.intro-screen{display:none}
+html.intro-pending .intro-screen{
+ display:block;position:fixed;inset:0;z-index:100;
+ background-color:#111;color:#fff;
+ transition:background-color 1.05s ease,color 1.05s ease
+}
+/* Phosphor line brightens, extends horizontally, and opens into a dim screen.
+   Avoid a full-white flash; the final canvas remains black until the reveal. */
+.intro-crt-boot{
+ position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;
+ background:#090b0b;animation:crt-boot-dismiss .25s ease 1.02s forwards;
+}
+.intro-crt-boot::before{
+ content:"";position:absolute;top:50%;left:50%;
+ width:0;height:2px;transform:translate(-50%,-50%);
+ background:rgba(244,255,250,.92);
+ box-shadow:0 0 12px rgba(255,255,255,.85),0 0 34px rgba(197,252,229,.32);
+ animation:crt-boot-beam 1.02s cubic-bezier(.26,0,.2,1) both;
+}
+.intro-crt-boot::after{
+ content:"";position:absolute;inset:0;
+ background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,rgba(185,218,208,.10) 4px);
+ opacity:0;animation:crt-boot-scanlines .8s ease .24s both;
+}
+@keyframes crt-boot-beam{
+ 0%{width:0;height:2px;opacity:0}
+ 10%{width:5vw;height:2px;opacity:1}
+ 46%{width:94vw;height:2px;opacity:1}
+ 65%{width:100vw;height:3px;opacity:.9}
+ 85%{width:100vw;height:84dvh;opacity:.16}
+ 100%{width:100vw;height:100dvh;opacity:0}
+}
+@keyframes crt-boot-dismiss{to{opacity:0;visibility:hidden}}
+@keyframes crt-boot-scanlines{0%{opacity:0}50%{opacity:.33}100%{opacity:0}}
+html.intro-pending:not(.intro-booted) .intro-screen-text{visibility:hidden}
+.intro-screen-text{
+ position:absolute;top:50%;left:clamp(15px,2.1vw,37px);
+ width:min(1600px,calc(100vw - 60px));
+ transform:translateY(-50%);margin:0;text-align:left;
+ font-size:clamp(20px,1.65vw,25px);
+ line-height:1.16;letter-spacing:-.022em;font-weight:400;
+ transition:top 1.05s cubic-bezier(.76,0,.24,1),
+            transform 1.05s cubic-bezier(.76,0,.24,1),
+            left 1.05s cubic-bezier(.76,0,.24,1),
+            width 1.05s cubic-bezier(.76,0,.24,1)
+}
+.intro-screen-text .intro-caret{
+ display:inline-block;width:2px;height:.84em;margin-left:3px;
+ vertical-align:-.08em;background:currentColor;
+ animation:intro-caret-blink .7s steps(1,end) infinite
+}
+@keyframes intro-caret-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+html.intro-pending .marquee-home .intro-original{visibility:hidden}
+html.intro-finishing .intro-screen{background-color:#fff;color:#171717}
+html.intro-finishing .intro-screen-text{
+ top:var(--intro-final-top,24px);transform:translateY(0);
+ text-align:left
+}
+html.intro-finishing .intro-screen-text .intro-caret{
+ animation:none;opacity:0;transition:opacity .2s ease
+}
+.marquee-home .home-copy>.group{
+ transition:opacity .64s ease,transform .64s cubic-bezier(.23,1,.32,1)
+}
+.marquee-home .marquee-stage{transition:opacity .85s ease,filter .24s ease}
+.marquee-home .marquee-hint{transition:opacity .7s ease}
+html.intro-pending .marquee-home .home-copy>.group{
+ opacity:0;transform:translateY(10px);pointer-events:none
+}
+html.intro-pending .marquee-home .marquee-stage,
+html.intro-pending .marquee-home .marquee-hint,
+html.intro-pending .marquee-home .motion-toggle{
+ opacity:0;pointer-events:none
+}
+@media(max-width:800px){
+ .intro-screen-text{left:17px;width:calc(100% - 34px);
+  font-size:clamp(18px,2.6vw,21px)}
+}
+@media(max-width:500px){.intro-screen-text{font-size:18px}}
+@media(prefers-reduced-motion:reduce){
+ .intro-crt-boot,.intro-crt-boot::before,.intro-crt-boot::after{animation:none;display:none}
+ .marquee-home .home-copy>.group,.marquee-home .marquee-stage,
+ .marquee-home .marquee-hint,.intro-screen,.intro-screen-text{transition:none}
+}
+
+@media(max-width:800px){
+ .marquee-home .home-copy{top:17px;left:17px;width:calc(100% - 34px);font-size:12px}
+ .marquee-home .home-copy .intro{max-width:100%;font-size:clamp(18px,2.6vw,21px)}
+ .marquee-home .marquee-stage{top:43%;height:46vh}
+ .marquee-home .marquee-item{width:calc(var(--w,190px)*.78);height:calc(var(--h,230px)*.78);margin-left:-15px}
+ .marquee-home .marquee-hint{right:17px}
+ .marquee-home .marquee-index{left:17px}
+ .marquee-home .home-overprint{top:25%;left:17px;right:17px;max-height:69%}
+ .marquee-home .overprint-inner{font-size:clamp(32px,8vw,58px)}
+}
+@media(max-width:500px){
+ .marquee-home .home-copy .intro{max-width:100%;font-size:18px}
+ .marquee-home .marquee-stage{top:48%;height:39vh}
+ .marquee-home .marquee-item{width:calc(var(--w,190px)*.65);height:calc(var(--h,230px)*.65);margin-left:-13px}
+ .marquee-home .marquee-hint{max-width:47%}
+ .marquee-home .marquee-viewport{-webkit-mask-image:none;mask-image:none}
+}
+.marquee-home .motion-toggle{
+ position:absolute;z-index:5;bottom:clamp(17px,3vh,38px);left:50%;
+ transform:translateX(-50%);display:none;border:1px solid #c9c9c9;
+ border-radius:0;background:#fff;padding:5px 9px;cursor:pointer;
+ font-size:11px;line-height:1.15;color:#141414
+}
+@media(prefers-reduced-motion:reduce){
+ .marquee-home .motion-toggle{display:inline-block}
+ .marquee-home .marquee-item{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="intro-screen" id="intro-screen" aria-hidden="true">
+ <span class="intro-crt-boot" aria-hidden="true"></span>
+ <p class="intro-screen-text" id="intro-screen-text"><span id="intro-typed"></span><span class="intro-caret"></span></p>
+</div>
+<main id="home" class="home marquee-home">
+ <div class="home-copy">
+  <p class="intro"><span class="intro-original">Distinct Archives is an independent design practice working across visual identities, art direction, editorial design and digital experiences. The practice develops visual systems for people, places and ideas.</span></p>
+  <div class="group">
+   <div>Selected work</div>
+   <nav class="stack" id="work-links" aria-label="Selected projects"></nav>
+  </div>
+  <div class="group">
+   <div>Practice</div>
+   <button class="plain" data-go="about" type="button">About</button>
+   <button class="plain" data-go="contact" type="button">Contact</button>
+   <button class="plain" data-go="archive" type="button">Visual archive</button>
+  </div>
+  <div class="group"><p>Distinct Archives<br>Independent brand design practice</p></div>
+ </div>
+ <div class="marquee-stage">
+  <div class="marquee-viewport" id="marquee-viewport" aria-label="Moving images from projects and visual archive">
+   <div class="marquee-track" id="marquee-track">
+    <div class="marquee-set" id="marquee-set">
+     <button class="marquee-item" style="--w:175px;--h:220px;--y:-29px;--rot:-1.1deg" data-project="naif" aria-label="Open Naïf project"><img src="/Distinct_Framer_Media/naif/Image-1.jpg" alt="Naïf — visual identity" draggable="false"><span class="image-caption">Naïf <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:115px;--h:169px;--y:48px;--rot:1.4deg" data-archive="2" aria-label="Open archive image 036"><img src="/Distinct_Framer_Media/036/Image.png" alt="Visual archive image 036" draggable="false"><span class="image-caption">Archive / 036 <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:244px;--h:178px;--y:-47px;--rot:-.6deg" data-project="nate" aria-label="Open Nathaniel Earl project"><img src="/Distinct_Framer_Media/nate/Featured-Image.png" alt="Nathaniel Earl — project artwork" draggable="false"><span class="image-caption">Nathaniel Earl <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:171px;--h:240px;--y:22px;--rot:.8deg" data-archive="7" aria-label="Open archive image 031"><img src="/Distinct_Framer_Media/031/Image.png" alt="Visual archive image 031" draggable="false"><span class="image-caption">Archive / 031 <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:212px;--h:165px;--y:-8px;--rot:-1.2deg" data-project="wna" aria-label="Open Woodstock New Age project"><img src="/Distinct_Framer_Media/wna/Image-1.png" alt="Woodstock New Age — visual design" draggable="false"><span class="image-caption">Woodstock New Age <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:148px;--h:207px;--y:40px;--rot:.5deg" data-archive="12" aria-label="Open archive image 026"><img src="/Distinct_Framer_Media/026/Image.png" alt="Visual archive image 026" draggable="false"><span class="image-caption">Archive / 026 <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:180px;--h:236px;--y:-39px;--rot:1deg" data-project="kombucha" aria-label="Open Kombucha project"><img src="/Distinct_Framer_Media/kombucha/Featured-Image.png" alt="Kombucha — packaging design" draggable="false"><span class="image-caption">Kombucha <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:124px;--h:165px;--y:34px;--rot:-1.3deg" data-archive="19" aria-label="Open archive image 019"><img src="/Distinct_Framer_Media/019/Image.jpg" alt="Visual archive image 019" draggable="false"><span class="image-caption">Archive / 019 <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:205px;--h:169px;--y:-38px;--rot:.5deg" data-project="xine" aria-label="Open Xine project"><img src="/Distinct_Framer_Media/xine/Featured-Image.png" alt="Xine — graphic design" draggable="false"><span class="image-caption">Xine <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:138px;--h:228px;--y:15px;--rot:1.2deg" data-archive="27" aria-label="Open archive image 011"><img src="/Distinct_Framer_Media/011/Image.png" alt="Visual archive image 011" draggable="false"><span class="image-caption">Archive / 011 <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:186px;--h:232px;--y:-28px;--rot:-.8deg" data-project="naif" aria-label="Open Naïf project"><img src="/Distinct_Framer_Media/naif/Image-2.jpg" alt="Naïf — project photograph" draggable="false"><span class="image-caption">Naïf <span>↗</span></span></button>
+     <button class="marquee-item" style="--w:195px;--h:148px;--y:39px;--rot:.8deg" data-archive="32" aria-label="Open archive image 006"><img src="/Distinct_Framer_Media/006/Image.png" alt="Visual archive image 006" draggable="false"><span class="image-caption">Archive / 006 <span>↗</span></span></button>
+    </div>
+   </div>
+  </div>
+ </div>
+
+ <div class="marquee-hint">Swipe or scroll to spin<br>Tap an image to explore</div>
+ <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Play motion</button>
+ <button id="home-image" class="home-image" type="button" aria-label="Open featured project" tabindex="-1"><img src="/Distinct_Framer_Media/naif/Thumbnail-Image.png" alt=""></button>
+ <section class="home-overprint" id="home-overprint" aria-hidden="true" aria-live="polite"><div class="overprint-inner" id="overprint-inner"></div></section>
+</main>
+<section class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="Portfolio content" aria-hidden="true">
+ <div class="overlay-top"><button class="plain top-identity" id="back-home" type="button">Distinct Archives</button><button class="plain" id="close" type="button">Close</button></div>
+ <div id="overlay-body"></div>
+</section>
+<script src="/app.js"></script>
+<script>
+(function(){
+ const track=document.getElementById('marquee-track');
+ const set=document.getElementById('marquee-set');
+ const viewport=document.getElementById('marquee-viewport');
+ const home=document.getElementById('home');
+ const overlay=document.getElementById('overlay');
+ const toggle=document.getElementById('motion-toggle');
+ const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+ const finePointer=window.matchMedia('(hover: hover) and (pointer: fine)');
+ const duplicate=set.cloneNode(true);
+ duplicate.removeAttribute('id');
+ duplicate.setAttribute('aria-hidden','true');
+ duplicate.querySelectorAll('button').forEach(button=>button.setAttribute('tabindex','-1'));
+ track.appendChild(duplicate);
+
+ let width=Math.max(1,set.getBoundingClientRect().width);
+ let position=0,velocity=0;
+ let hovered=false,gesture=null;
+ let ignoreClickUntil=0,paused=reduceMotion.matches;
+ let lastFrame=performance.now();
+
+ const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
+ const wrap=n=>{const r=n%width;return r>0?r-width:r;};
+ const refreshWidth=()=>{
+  const next=set.getBoundingClientRect().width;
+  if(next>1){width=next;position=wrap(position);}
+ };
+ if('ResizeObserver' in window)new ResizeObserver(refreshWidth).observe(set);
+ window.addEventListener('load',refreshWidth,{once:true});
+ window.addEventListener('resize',refreshWidth);
+
+ const blocked=()=>document.documentElement.classList.contains('intro-pending')||home.classList.contains('overprinting')||overlay.classList.contains('open');
+ const updateToggle=()=>{
+  toggle.textContent=paused?'Play motion':'Pause motion';
+  toggle.setAttribute('aria-pressed',String(!paused));
+  home.classList.toggle('motion-enabled',!paused);
+ };
+ updateToggle();
+ toggle.addEventListener('click',()=>{
+  paused=!paused;
+  if(paused)velocity=0;
+  refreshWidth();updateToggle();
+ });
+ if('addEventListener' in reduceMotion)reduceMotion.addEventListener('change',e=>{
+  paused=e.matches;velocity=0;updateToggle();refreshWidth();
+ });
+
+ function frame(now){
+  const dt=Math.min(.05,Math.max(0,(now-lastFrame)/1000));
+  lastFrame=now;
+  if(!gesture&&!blocked()&&!paused){
+   // Approximately 28 seconds per full set, with additional momentum from gestures.
+   const autoRun=!(finePointer.matches&&hovered)&&!(finePointer.matches&&viewport.contains(document.activeElement));
+   const autoplay=autoRun?-width/28:0;
+   position=wrap(position+(autoplay+velocity)*dt);
+   velocity*=Math.exp(-3.1*dt);
+   if(Math.abs(velocity)<.5)velocity=0;
+  }
+  track.style.transform='translate3d('+position.toFixed(2)+'px,0,0)';
+  requestAnimationFrame(frame);
+ }
+ requestAnimationFrame(frame);
+
+ // Hover pauses automatic drift on desktop only. Touchscreens keep drifting
+ // after tapping an image, rather than treating touch focus as a mouse hover.
+ viewport.addEventListener('pointerenter',e=>{
+  if(finePointer.matches&&e.pointerType==='mouse')hovered=true;
+ });
+ viewport.addEventListener('pointerleave',e=>{
+  if(e.pointerType==='mouse')hovered=false;
+ });
+
+ // Mouse wheel / trackpad: both vertical and horizontal scroll spin the reel.
+ viewport.addEventListener('wheel',e=>{
+  if(blocked()||paused)return;
+  e.preventDefault();
+  const axis=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
+  const factor=e.deltaMode===1?16:e.deltaMode===2?viewport.clientWidth:1;
+  const delta=clamp(axis*factor,-220,220);
+  position=wrap(position-delta*.65);
+  velocity=clamp(velocity-delta*7,-2500,2500);
+ },{passive:false});
+
+ function beginGesture(id,x,y){
+  if(blocked())return;
+  gesture={id,startX:x,startY:y,lastX:x,lastY:y,time:performance.now(),speed:0,axis:null,moving:false};
+ }
+ function moveGesture(x,y,e){
+  if(!gesture)return;
+  const now=performance.now(),dx=x-gesture.lastX,dy=y-gesture.lastY;
+  if(!gesture.moving){
+   const totalX=x-gesture.startX,totalY=y-gesture.startY;
+   if(Math.hypot(totalX,totalY)<7)return;
+   gesture.moving=true;
+   gesture.axis=Math.abs(totalX)>=Math.abs(totalY)*.9?'x':'y';
+   velocity=0;
+   viewport.classList.add('is-dragging');
+  }
+  // In the fixed mobile layout, vertical swipes also browse the horizontal reel.
+  const movement=gesture.axis==='x'?dx:dy*.8;
+  const dt=Math.max(.008,(now-gesture.time)/1000);
+  position=wrap(position+movement);
+  const sample=clamp(movement/dt,-2600,2600);
+  gesture.speed=gesture.speed*.38+sample*.62;
+  gesture.lastX=x;gesture.lastY=y;gesture.time=now;
+  if(e&&e.cancelable)e.preventDefault();
+ }
+ function endGesture(){
+  if(!gesture)return;
+  if(gesture.moving){
+   velocity=clamp(gesture.speed,-2300,2300);
+   ignoreClickUntil=performance.now()+550;
+   viewport.classList.remove('is-dragging');
+  }
+  gesture=null;
+ }
+ viewport.addEventListener('click',e=>{
+  if(performance.now()>=ignoreClickUntil)return;
+  e.preventDefault();e.stopImmediatePropagation();
+  ignoreClickUntil=0;
+ },true);
+
+ // Mouse and pen use pointer events; mobile Safari uses native touch events.
+ viewport.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='touch'||!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0))return;
+  ignoreClickUntil=0;beginGesture(e.pointerId,e.clientX,e.clientY);
+ });
+ viewport.addEventListener('pointermove',e=>{
+  if(!gesture||e.pointerType==='touch'||gesture.id!==e.pointerId)return;
+  if(!gesture.moving&&Math.hypot(e.clientX-gesture.startX,e.clientY-gesture.startY)<7)return;
+  moveGesture(e.clientX,e.clientY,e);
+  if(gesture?.moving&& !viewport.hasPointerCapture(e.pointerId)){
+   try{viewport.setPointerCapture(e.pointerId)}catch(_){}
+  }
+ });
+ viewport.addEventListener('pointerup',e=>{
+  if(e.pointerType==='touch'||!gesture||gesture.id!==e.pointerId)return;
+  endGesture();
+  try{if(viewport.hasPointerCapture(e.pointerId))viewport.releasePointerCapture(e.pointerId)}catch(_){}
+ });
+ viewport.addEventListener('pointercancel',e=>{if(e.pointerType!=='touch')endGesture();});
+ viewport.addEventListener('lostpointercapture',()=>{if(gesture)endGesture();});
+
+ // Dedicated touch handling avoids the touch-action:pan-y cancellation that
+ // previously prevented dragging on iPhones and other mobile browsers.
+ viewport.addEventListener('touchstart',e=>{
+  if(e.touches.length!==1||blocked())return;
+  const touch=e.touches[0];
+  ignoreClickUntil=0;beginGesture(touch.identifier,touch.clientX,touch.clientY);
+ },{passive:true});
+ viewport.addEventListener('touchmove',e=>{
+  if(!gesture||e.touches.length!==1)return;
+  const touch=e.touches[0];
+  if(touch.identifier!==gesture.id)return;
+  moveGesture(touch.clientX,touch.clientY,e);
+ },{passive:false});
+ viewport.addEventListener('touchend',e=>{
+  if(!gesture)return;
+  for(const t of e.changedTouches){if(t.identifier===gesture.id){endGesture();break;}}
+ },{passive:true});
+ viewport.addEventListener('touchcancel',()=>endGesture(),{passive:true});
+
+ // Editorial About/Contact panels dismiss when tapping or clicking outside the text.
+ // Keep the navigation usable for switching between the two panels.
+ document.addEventListener('click',e=>{
+  if(!home.classList.contains('overprinting'))return;
+  const target=e.target;
+  if(!(target instanceof Element))return;
+  if(target.closest('[data-go="about"],[data-go="contact"]'))return;
+  if(target.closest('#overprint-inner h2,#overprint-inner p,#overprint-inner a,#overprint-inner .about-photo'))return;
+  // Consume the background click so it does not also open an underlying project.
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  close();
+ },true);
+
+ track.addEventListener('click',e=>{
+  const button=e.target.closest('button.marquee-item');
+  if(!button)return;
+  if(button.dataset.project){
+   open(button.dataset.project);
+  }else if(button.dataset.archive!==undefined){
+   open('archive');
+   const imageButton=document.querySelector(
+    '#overlay-body .archive-grid [data-archive="'+button.dataset.archive+'"]'
+   );
+   if(imageButton)imageButton.click();
+  }
+ });
+
+ // Cinematic opening for both desktop and mobile, skipped for reduced motion
+ // and direct project/overlay links. The normal paragraph remains in the DOM
+ // for accessibility and determines the exact final landing position.
+ (function runIntro(){
+  const root=document.documentElement;
+  if(!root.classList.contains('intro-pending'))return;
+  const original=document.querySelector('.marquee-home .intro-original');
+  const target=document.querySelector('.marquee-home .intro');
+  const typed=document.getElementById('intro-typed');
+  const stageText=document.getElementById('intro-screen-text');
+  const motionQuery=window.matchMedia('(prefers-reduced-motion: reduce)');
+  let completed=false;
+  const skip=()=>{
+   if(completed)return;
+   completed=true;
+   root.classList.remove('intro-pending','intro-finishing','intro-booted');
+   typed.textContent='';
+  };
+  if(!original||!target||!typed||!stageText||motionQuery.matches||location.hash){
+   skip();return;
+  }
+  const chars=Array.from(original.textContent);
+  const bootMs=1280;
+  const cursorOnlyMs=950;
+  const typingMs=3250;
+  const fullTextHoldMs=280;
+  const transitionMs=1050;
+  let start=null;
+  function moveToLayout(){
+   if(completed)return;
+   const rect=target.getBoundingClientRect();
+   stageText.style.setProperty('--intro-final-top',rect.top+'px');
+   stageText.style.left=rect.left+'px';
+   stageText.style.width=rect.width+'px';
+   typed.textContent=original.textContent;
+   root.classList.add('intro-finishing');
+   setTimeout(skip,transitionMs+80);
+  }
+  function tick(now){
+   if(completed)return;
+   if(start===null)start=now;
+   const elapsed=now-start;
+   if(elapsed<bootMs){
+    requestAnimationFrame(tick);
+    return;
+   }
+   if(!root.classList.contains('intro-booted'))root.classList.add('intro-booted');
+   if(elapsed<bootMs+cursorOnlyMs){
+    requestAnimationFrame(tick);
+    return;
+   }
+   const progress=Math.min(1,(elapsed-bootMs-cursorOnlyMs)/typingMs);
+   const count=Math.min(chars.length,Math.floor(progress*chars.length));
+   typed.textContent=chars.slice(0,count).join('');
+   if(progress>=1){
+    setTimeout(moveToLayout,fullTextHoldMs);
+    return;
+   }
+   requestAnimationFrame(tick);
+  }
+  if(motionQuery.addEventListener)motionQuery.addEventListener('change',e=>{if(e.matches)skip()},{once:true});
+  window.addEventListener('popstate',skip,{once:true});
+  window.addEventListener('hashchange',skip,{once:true});
+  window.addEventListener('pagehide',skip,{once:true});
+  requestAnimationFrame(tick);
+ })();
+})();
+</script>
+</body>
+</html>
