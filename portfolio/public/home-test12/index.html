@@ -241,6 +241,11 @@ html.intro-pending .marquee-home .motion-toggle{
    a dense long diagonal stack, large visible print faces up front,
    receding toward the upper-right with no artificial white borders.
    Original editorial text and official homepage remain unchanged. */
+/* The wide editorial header must not mask the thin poster edges at the
+   distant end of the row. Navigation buttons remain fully interactive. */
+.spatial-home .home-copy{pointer-events:none}
+.spatial-home .home-copy button,
+.spatial-home .home-copy a{pointer-events:auto}
 .spatial-home .spatial-stage{
  top:27%;height:69dvh;display:block;z-index:2;
  pointer-events:none;overflow:visible
@@ -285,7 +290,8 @@ html.intro-pending .marquee-home .motion-toggle{
 }
 .spatial-home .spatial-card:hover .spatial-face,
 .spatial-home .spatial-card:focus-visible .spatial-face{
- transform:translate3d(0,calc(-1 * clamp(32px,5.5vh,58px)),86px) scale(1.075);
+ /* Pure vertical lift — no forward movement, depth change, or scaling. */
+ transform:translate3d(0,calc(-1 * clamp(36px,5.8vh,64px)),0);
  box-shadow:2px 3px 0 rgba(15,15,15,.19),
             9px 14px 20px rgba(15,15,15,.17),
             20px 32px 42px rgba(15,15,15,.20)
@@ -398,7 +404,7 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
  }
  // A single row; all other rack groups have been removed.
  const rack=document.getElementById('spatial-rack-0');
- const cards=Array.from({length:52},(_,i)=>{
+ const cards=Array.from({length:60},(_,i)=>{
   const item=imagePool[(i*9)%imagePool.length];
   const card=document.createElement('button');
   card.className='spatial-card';card.type='button';
@@ -453,12 +459,12 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
   const cw=mobile?Math.min(127,w*.34):tablet?Math.min(174,w*.22):Math.min(250,w*.15);
   const ch=Math.round(cw*(mobile?1.12:1.07));
   geometry={
-   w,h,visible:mobile?18:tablet?30:40,
-   x0:w*(mobile?.32:tablet?.30:.315),
-   y0:h*(mobile?.72:tablet?.73:.72),
-   // Compress the card-to-card gaps without flattening the diagonal.
-   dx:w*(mobile?.022:tablet?.0155:.0123),
-   dy:h*(mobile?.023:tablet?.019:.017),
+   w,h,visible:mobile?22:tablet?36:48,
+   x0:w*(mobile?.275:tablet?.27:.27),
+   y0:h*(mobile?.74:tablet?.77:.80),
+   // Extend the diagonal line without loosening the printed-paper stack.
+   dx:w*(mobile?.024:tablet?.016:.013),
+   dy:h*(mobile?.020:tablet?.018:.015),
    dz:mobile?9:tablet?11:12,
    angle:mobile?-28:-32,
    skew:mobile?18:22
@@ -478,7 +484,7 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
   cards.forEach((card,i)=>{
    // Wrap only after a card has fully left the rendered range.
    const k=((i+phase)%len+len)%len;
-   if(k>visible+.4){
+   if(k>visible+1.2){
     if(card.style.visibility!=='hidden'){
      card.style.visibility='hidden';
      card.style.pointerEvents='none';
@@ -487,7 +493,8 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
    }
    if(card.style.visibility!=='visible')card.style.visibility='visible';
    const fadeIn=clamp(k/.55,0,1);
-   const fadeOut=clamp((visible+.4-k)/1.5,0,1);
+   // Distant prints retain hit areas until the very end of the fade.
+   const fadeOut=clamp((visible+1.2-k)/1.2,0,1);
    const opacity=Math.min(fadeIn,fadeOut);
    const x=x0+k*dx-w*.5;
    const y=y0-k*dy-h*.5;
@@ -499,7 +506,7 @@ html.intro-pending .spatial-home .spatial-stage{pointer-events:none}
    const rank=Math.round(600-k*12);
    const zIndex=card===activeCard?900:rank;
    if(card.style.zIndex!==String(zIndex))card.style.zIndex=String(zIndex);
-   const events=opacity>.3?'auto':'none';
+   const events=opacity>.06?'auto':'none';
    if(card.style.pointerEvents!==events)card.style.pointerEvents=events;
   });
   lastRendered=phase;
