@@ -477,9 +477,14 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
  let rushFinished=!document.documentElement.classList.contains('intro-sequencing');
  let rushOffset=rushFinished?0:100;
  const rushDuration=2250;
+ // First spin: roll 24 prints rapidly past the viewer, then brake gently.
+ // Spin and incoming row share the same timeline for a seamless handoff.
+ const initialSpinDistance=24;
+ let initialSpinPassed=0;
  function beginRush(){
   if(rushFinished||rushStart!==null)return;
   rushOffset=(geometry?geometry.visible:48)+8;
+  initialSpinPassed=0;
   rushStart=performance.now();
   document.documentElement.classList.add('intro-posters-revealing');
   layoutDirty=true;
@@ -571,6 +576,13 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
   if(rushStart!==null&&!rushFinished){
    const t=clamp((now-rushStart)/rushDuration,0,1);
    rushOffset=((geometry?geometry.visible:48)+8)*Math.pow(1-t,3.4);
+   // A one-time spin through the artwork. The early motion is fast and
+   // smoothly drops toward zero as the incoming deck finds its place.
+   const easedSpin=initialSpinDistance*(1-Math.pow(1-t,2.6));
+   const spinStep=easedSpin-initialSpinPassed;
+   initialSpinPassed=easedSpin;
+   phase-=spinStep;
+   targetPhase-=spinStep;
    layoutDirty=true;
    if(t>=1){
     rushStart=null;rushFinished=true;rushOffset=0;
