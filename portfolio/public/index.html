@@ -602,7 +602,7 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
   if(!gesture&&!isBlocked&&!paused){
    // Smooth constant drift and momentum, without per-frame geometry changes.
    if(!(finePointer.matches&&hovered)){
-    targetPhase+=dt*(.19+velocity);
+    targetPhase+=dt*(-.27+velocity);
    }
    velocity*=Math.exp(-3.4*dt);
    if(Math.abs(velocity)<.004)velocity=0;
