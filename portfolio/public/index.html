@@ -348,19 +348,21 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
 }
 
 
-/* Early desktop-era bitmap cursor: sharp black-and-white arrow and hand. */
-:root{
- --retro-arrow:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAyUlEQVR42s2XUQ7DIAxDsdX7H5GreF+TSstoCQkZfxXQvNghiFL+ZCgrMLMh2FFCmQDb1WgAaq3bIW4KSCqStlnCn8dC2qIGh2fzDqGtAB1L3NXg24VREJxZHGEJZzd4W0LrRi8IrtB79Ax6FNKKGsdsMAAz1ztcFXgZfEqNYxTsIm0zHdoHvpkCaLK+FFwMgEHmpYFBRs3c2Y4TJEIs8PTYAoDed1QtMCvzHgCeaiVCBWZlbumEISosXUYePcPyB2UWbepDNmR8AJ6UXKy5xeSUAAAAAElFTkSuQmCC") 1 1;
- --retro-hand:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAvUlEQVR42u2WWw6FMAhEZ0j3v7xuZ/w1V6UvSJOb8qexcGAQCmw2DnyrAB8Ps90VGAaQBEn7AGqteyuwXYIDcAD+DqAE+dHseLaE4N7eyJNgdkSXlYAAQPIrsHoksYjMveeWJKWhLVehSLr+2NFYvL+b0fkG8YhpHeVStEwegD4OKWsQmUccefPpBeCvZtkQZVXDDAn40rlrd3/Hl80ejPgFPQBGQngzp8e7Znuhlf3I3lZG9iPLiBnBjwHABeFgRazRttOPAAAAAElFTkSuQmCC") 12 1;
+/* White difference-blended dot reads black on white, and negative over
+   every image and text layer. Real system pointer stays on touch screens. */
+.distinct-invert-cursor{
+ position:fixed;top:-10px;left:-10px;width:20px;height:20px;
+ border-radius:50%;background:#fff;mix-blend-mode:difference;
+ pointer-events:none!important;z-index:2147483647;
+ opacity:0;transform:translate3d(-100px,-100px,0);
+ will-change:transform;transition:opacity .12s ease
 }
-html,body,html body *{cursor:var(--retro-arrow),auto}
-html body button,html body button *,
-html body a,html body a *,
-html body .spatial-window,html body .spatial-window *,
-html body [role="button"]{cursor:var(--retro-hand),pointer!important}
-html body .spatial-window.dragging,
-html body .spatial-window.dragging *{cursor:var(--retro-hand),grabbing!important}
-html body input,html body textarea{cursor:text!important}
+@media (hover:hover) and (pointer:fine){
+ html,body,html body *{cursor:none!important}
+}
+@media (hover:none), (pointer:coarse){
+ .distinct-invert-cursor{display:none!important}
+}
 
 </style>
 </head>
@@ -491,16 +493,9 @@ html body input,html body textarea{cursor:text!important}
  let rushStart=null;
  let rushFinished=!document.documentElement.classList.contains('intro-sequencing');
  let rushOffset=rushFinished?0:100;
- // Triple-length intro spin. It rolls in the same visual direction as the
- // entering archive, completes multiple passes, then gently decelerates.
- // The images appear and finish their original short rush first.
- // A separate demonstration spin then shows the archive can be scrolled.
+ // Keep the original short entrance rush after the sidebar. No extra
+ // automated gallery spin; the normal gentle drift follows immediately.
  const rushDuration=2250;
- const demoSpinDuration=2900;
- const demoSpinDistance=32;
- let demoSpinStart=null;
- let demoSpinPassed=0;
- let idleDirection=1;
  function beginRush(){
   if(rushFinished||rushStart!==null)return;
   rushOffset=(geometry?geometry.visible:48)+8;
@@ -509,13 +504,7 @@ html body input,html body textarea{cursor:text!important}
   layoutDirty=true;
  }
  function cancelRush(){
-  rushStart=null;rushFinished=true;rushOffset=0;
-  demoSpinStart=null;demoSpinPassed=0;idleDirection=1;
-  layoutDirty=true;
- }
- function cancelDemoSpin(){
-  demoSpinStart=null;
-  demoSpinPassed=0;
+  rushStart=null;rushFinished=true;rushOffset=0;layoutDirty=true;
  }
  // Hit regions are calculated from the same perspective as the moving deck.
  // At the far end, the exposed edges are narrower than the 3D button layers;
@@ -606,30 +595,14 @@ html body input,html body textarea{cursor:text!important}
     rushStart=null;rushFinished=true;rushOffset=0;
     document.documentElement.classList.remove(
      'intro-sequencing','intro-sidebar-revealing','intro-posters-revealing');
-    // All prints are now in position. Give the viewer a moment to see
-    // the full stack before spinning it along the entry direction.
-    demoSpinStart=now+360;
-    demoSpinPassed=0;
-    idleDirection=-1;
+
    }
   }
   const isBlocked=blocked();
-  if(demoSpinStart!==null&&!paused&&!isBlocked&&now>=demoSpinStart){
-   const t=clamp((now-demoSpinStart)/demoSpinDuration,0,1);
-   const passed=demoSpinDistance*(1-Math.pow(1-t,3.1));
-   const delta=passed-demoSpinPassed;
-   demoSpinPassed=passed;
-   // Negative phase matches the rush direction: prints roll toward
-   // the viewer before settling into a subtle continuous drift.
-   phase-=delta;
-   targetPhase-=delta;
-   layoutDirty=true;
-   if(t>=1)cancelDemoSpin();
-  }
-  if(!gesture&&!isBlocked&&!paused&&demoSpinStart===null){
+  if(!gesture&&!isBlocked&&!paused){
    // Smooth constant drift and momentum, without per-frame geometry changes.
    if(!(finePointer.matches&&hovered)){
-    targetPhase+=dt*(idleDirection*.19+velocity);
+    targetPhase+=dt*(.19+velocity);
    }
    velocity*=Math.exp(-3.4*dt);
    if(Math.abs(velocity)<.004)velocity=0;
@@ -676,7 +649,6 @@ html body input,html body textarea{cursor:text!important}
  });
  function startDrag(id,x,y){
   if(blocked())return;
-  if(demoSpinStart!==null)cancelDemoSpin();
   gesture={id,startX:x,startY:y,lastX:x,lastY:y,lastTime:performance.now(),speed:0,moved:false};
   velocity=0;
  }
@@ -706,7 +678,6 @@ html body input,html body textarea{cursor:text!important}
  }
  viewport.addEventListener('wheel',e=>{
   if(blocked())return;
-  if(demoSpinStart!==null)cancelDemoSpin();
   e.preventDefault();
   const delta=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
   const d=clamp(delta*(e.deltaMode===1?15:1),-100,100);
@@ -754,7 +725,6 @@ html body input,html body textarea{cursor:text!important}
   const card=pickPoster(e.clientX,e.clientY)||
    e.target.closest('.spatial-card');
   if(!card||blocked())return;
-  if(demoSpinStart!==null)cancelDemoSpin();
   if(card.dataset.project){open(card.dataset.project);}
   else if(card.dataset.archive!==undefined){
    open('archive');
@@ -852,6 +822,30 @@ html body input,html body textarea{cursor:text!important}
   window.addEventListener('pagehide',skip,{once:true});
   requestAnimationFrame(tick);
  })();
+
+ // Overlay has no hit area: pointer, project links, drag and wheel still work.
+ (function installNegativeCursor(){
+  const dot=document.createElement('div');
+  dot.className='distinct-invert-cursor';
+  dot.setAttribute('aria-hidden','true');
+  document.body.appendChild(dot);
+  let x=-100,y=-100,frame=0;
+  const draw=()=>{
+   frame=0;
+   dot.style.transform='translate3d('+x+'px,'+y+'px,0)';
+  };
+  document.addEventListener('pointermove',e=>{
+   if(e.pointerType!=='mouse'&&e.pointerType!=='pen')return;
+   x=e.clientX;y=e.clientY;
+   dot.style.opacity='1';
+   if(!frame)frame=requestAnimationFrame(draw);
+  },{passive:true});
+  document.addEventListener('pointerout',e=>{
+   if(!e.relatedTarget)dot.style.opacity='0';
+  },{passive:true});
+  window.addEventListener('blur',()=>{dot.style.opacity='0'});
+ })();
+
 })();
 </script>
 </body>
