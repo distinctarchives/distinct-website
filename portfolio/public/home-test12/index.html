@@ -619,10 +619,10 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
   const x=clientX-bounds.left,y=clientY-bounds.top;
   if(x<0||x>bounds.width||y<0||y>bounds.height)return null;
   let best=null,bestScore=Infinity;
-  // The first prints can use the browser's normal hit testing. The
-  // later prints use their exposed diagonal slices, not their covered DOM box.
+  // Every print, including the large foreground prints, uses the same
+  // screen-space picking. Native 3D hit testing alone misses some cards.
   for(const slot of projectedCards){
-   if(slot.k<11||slot.k>geometry.visible+.5)continue;
+   if(slot.k>geometry.visible+.5)continue;
    const dx=x-slot.x,dy=y-slot.y;
    if(Math.abs(dx)>slot.width*.62+8 ||
       Math.abs(dy)>slot.height*.73+15)continue;
@@ -635,12 +635,19 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
  viewport.addEventListener('pointerenter',e=>{
   if(e.pointerType==='mouse'&&finePointer.matches)hovered=true;
  });
- viewport.addEventListener('pointermove',e=>{
+ // Listen on the whole homepage: foreground cards may visibly protrude
+ // beyond the rack's 3D viewport, and other layers can intercept DOM hits.
+ function findPosterTarget(target,clientX,clientY){
+  if(!(target instanceof Element))return null;
+  if(target.closest('.home-copy,.marquee-hint,.motion-toggle,.home-overprint'))return null;
+  return pickPoster(clientX,clientY)||
+   target.closest('.spatial-card');
+ }
+ home.addEventListener('pointermove',e=>{
   if(e.pointerType==='touch'||gesture||blocked())return;
-  const selected=pickPoster(e.clientX,e.clientY)||
-   e.target.closest('.spatial-card');
+  const selected=findPosterTarget(e.target,e.clientX,e.clientY);
   setActiveCard(selected);
- },{passive:true});
+ },{capture:true,passive:true});
  viewport.addEventListener('pointerleave',e=>{
   if(e.pointerType==='mouse'){
    hovered=false;
@@ -721,10 +728,14 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
   if(performance.now()>=ignoreClickUntil)return;
   e.preventDefault();e.stopImmediatePropagation();
  },true);
- viewport.addEventListener('click',e=>{
-  const card=pickPoster(e.clientX,e.clientY)||
-   e.target.closest('.spatial-card');
-  if(!card||blocked())return;
+ // Capture clicks before nested 3D layers can swallow the event. The
+ // geometric hit test works across the entire stack, not just posters 12+.
+ home.addEventListener('click',e=>{
+  if(blocked()||performance.now()<ignoreClickUntil)return;
+  const card=findPosterTarget(e.target,e.clientX,e.clientY);
+  if(!card)return;
+  e.preventDefault();
+  e.stopPropagation();
   if(card.dataset.project){open(card.dataset.project);}
   else if(card.dataset.archive!==undefined){
    open('archive');
@@ -732,7 +743,7 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
     card.dataset.archive+'"]');
    if(button)button.click();
   }
- });
+ },true);
  // Same outside-click behavior as the current official homepage.
  document.addEventListener('click',e=>{
   if(!home.classList.contains('overprinting'))return;
