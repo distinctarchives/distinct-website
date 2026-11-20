@@ -283,7 +283,8 @@ html.intro-pending .marquee-home .motion-toggle{
             box-shadow .4s ease;
 }
 .spatial-home .spatial-card img{
- display:block;width:100%;height:100%;object-fit:cover;
+ display:block;width:100%;height:100%;object-fit:contain;
+ /* Original aspect ratio: no cropping, stretching, or uniform print frame. */
  user-select:none;-webkit-user-select:none;-webkit-user-drag:none;
  backface-visibility:hidden;pointer-events:none
 }
@@ -449,6 +450,18 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
   img.src=encodeURI(item.src);
   img.alt=item.alt;img.draggable=false;
   img.loading=i<36?'eager':'lazy';img.decoding='async';
+  // Measure the actual asset; poster, square, and landscape prints keep
+  // their native proportions without changing the diagonal stack.
+  const readAspect=()=>{
+   if(!img.naturalWidth||!img.naturalHeight)return;
+   card.dataset.aspect=String(img.naturalWidth/img.naturalHeight);
+   if(geometry){
+    fitCard(card,geometry.cw,geometry.ch);
+    layoutDirty=true;
+   }
+  };
+  img.addEventListener('load',readAspect,{once:true});
+  if(img.complete&&img.naturalWidth)card.dataset.aspect=String(img.naturalWidth/img.naturalHeight);
   const caption=document.createElement('span');
   caption.className='spatial-caption';
   caption.textContent=item.label+' ↗';
@@ -509,6 +522,19 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
  // At the far end, the exposed edges are narrower than the 3D button layers;
  // screen-space picking keeps those posters hoverable and clickable.
  const projectedCards=[];
+ function fitCard(card,maxWidth,maxHeight){
+  const ratio=Number(card.dataset.aspect)||.82;
+  const safeRatio=Number.isFinite(ratio)&&ratio>0?ratio:.82;
+  // Fit the entire image inside one shared size envelope; never crop.
+  const scale=Math.min(maxWidth/safeRatio,maxHeight);
+  const width=Math.max(1,Math.round(safeRatio*scale));
+  const height=Math.max(1,Math.round(scale));
+  card.style.setProperty('--card-width',width+'px');
+  card.style.setProperty('--card-height',height+'px');
+  // Store dimensions once to avoid expensive live DOM reads each frame.
+  card.printWidth=width;
+  card.printHeight=height;
+ }
  function measure(){
   const w=viewport.clientWidth,h=viewport.clientHeight;
   if(!w||!h)return;
@@ -517,7 +543,9 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
   // deck receding from the lower-left to the upper-right. Keep the
   // paper edges dense, while expanding the full diagonal silhouette.
   const cw=mobile?Math.min(127,w*.34):tablet?Math.min(174,w*.22):Math.min(250,w*.15);
-  const ch=Math.round(cw*(mobile?1.12:1.07));
+  // Width defines the scale of the paper; taller posters can extend
+  // vertically while squares and landscape prints retain their shape.
+  const ch=Math.round(cw*(mobile?1.42:1.4));
   geometry={
    w,h,cw,ch,visible:mobile?22:tablet?36:48,
    x0:w*(mobile?.275:tablet?.27:.27),
@@ -529,10 +557,7 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
    angle:mobile?-28:-32,
    skew:mobile?18:22
   };
-  cards.forEach(card=>{
-   card.style.setProperty('--card-width',cw+'px');
-   card.style.setProperty('--card-height',ch+'px');
-  });
+  cards.forEach(card=>fitCard(card,cw,ch));
   layoutDirty=true;
  }
  if('ResizeObserver' in window)new ResizeObserver(measure).observe(viewport);
@@ -567,8 +592,8 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
     card,k,
     x:w*.5+(x)*projection,
     y:originY+(y+h*.5-originY)*projection,
-    width:cw*projection,
-    height:ch*projection
+    width:(card.printWidth||cw)*projection,
+    height:(card.printHeight||ch)*projection
    });
    card.style.transform='translate3d('+
     x.toFixed(2)+'px,'+y.toFixed(2)+'px,'+z.toFixed(2)+
