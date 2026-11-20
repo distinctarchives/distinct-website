@@ -415,43 +415,33 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
  const blocked=()=>document.documentElement.classList.contains('intro-sequencing')||
   document.documentElement.classList.contains('intro-pending')||
   home.classList.contains('overprinting')||overlay.classList.contains('open');
- const imagePool=[];
- const projectImgs=DATA.projects.map(p=>({
-  p,files:p.media.filter(m=>m.kind==='image')
+ // The moving deck is exclusively the visual archive. Selected projects
+ // remain accessible through the text navigation, not duplicated here.
+ // These are the exact native dimensions of archive images 038 through 001.
+ // Seeding them before image load prevents square placeholders or jumps.
+ const archiveDimensions=[[1778,1000],[1778,1000],[1000,1500],[1000,1500],[1000,1500],[1000,1500],[1000,1500],[1000,1500],[1000,1500],[1000,1500],[1000,1415],[1000,1375],[1000,908],[1000,924],[1000,1000],[1000,1000],[1000,1000],[1000,1250],[1000,1250],[1200,1500],[1000,1250],[1000,1250],[1000,1250],[1000,1250],[1200,1200],[1500,1500],[1500,1500],[1000,1673],[1500,1500],[1500,1500],[1000,1415],[1500,1500],[1500,1007],[1500,1007],[1500,1500],[1000,1415],[1000,1415],[1000,1377]];
+ const imagePool=DATA.archive.map((item,index)=>({
+  src:'/'+item.src,
+  alt:'Visual archive '+item.title,
+  label:'Archive / '+item.title,
+  archive:index,
+  aspect:archiveDimensions[index][0]/archiveDimensions[index][1]
  }));
- // Interleave work and archive prints so one stack feels like a real archive.
- for(let round=0;round<7;round++){
-  projectImgs.forEach(({p,files},j)=>{
-   if(files.length){
-    const m=files[round%files.length];
-    imagePool.push({
-     src:'/'+m.src,alt:p.title+' — project image',
-     label:p.title,project:p.slug
-    });
-   }
-   const aIndex=(round*6+j*7)%DATA.archive.length;
-   const a=DATA.archive[aIndex];
-   imagePool.push({
-    src:'/'+a.src,alt:'Visual archive '+a.title,
-    label:'Archive / '+a.title,archive:aIndex
-   });
-  });
- }
  // A single row; all other rack groups have been removed.
  const rack=document.getElementById('spatial-rack-0');
- const cards=Array.from({length:60},(_,i)=>{
+ const cards=Array.from({length:imagePool.length*2},(_,i)=>{
   const item=imagePool[(i*9)%imagePool.length];
   const card=document.createElement('button');
   card.className='spatial-card';card.type='button';
   card.setAttribute('aria-label','Open '+item.label);
-  if(item.project)card.dataset.project=item.project;
-  else card.dataset.archive=String(item.archive);
+  card.dataset.archive=String(item.archive);
+  card.dataset.aspect=String(item.aspect);
   const img=document.createElement('img');
   img.src=encodeURI(item.src);
   img.alt=item.alt;img.draggable=false;
   img.loading=i<36?'eager':'lazy';img.decoding='async';
-  // Measure the actual asset; poster, square, and landscape prints keep
-  // their native proportions without changing the diagonal stack.
+  // The embedded source dimensions set the shape before first paint;
+  // natural image dimensions verify it once loading completes.
   const readAspect=()=>{
    if(!img.naturalWidth||!img.naturalHeight)return;
    card.dataset.aspect=String(img.naturalWidth/img.naturalHeight);
@@ -523,8 +513,8 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
  // screen-space picking keeps those posters hoverable and clickable.
  const projectedCards=[];
  function fitCard(card,maxWidth,maxHeight){
-  const ratio=Number(card.dataset.aspect)||.82;
-  const safeRatio=Number.isFinite(ratio)&&ratio>0?ratio:.82;
+  const ratio=Number(card.dataset.aspect)||1;
+  const safeRatio=Number.isFinite(ratio)&&ratio>0?ratio:1;
   // Fit the entire image inside one shared size envelope; never crop.
   const scale=Math.min(maxWidth/safeRatio,maxHeight);
   const width=Math.max(1,Math.round(safeRatio*scale));
@@ -547,12 +537,12 @@ html.intro-sequencing.intro-posters-revealing .spatial-home .spatial-stage{
   // vertically while squares and landscape prints retain their shape.
   const ch=Math.round(cw*(mobile?1.42:1.4));
   geometry={
-   w,h,cw,ch,visible:mobile?22:tablet?36:48,
+   w,h,cw,ch,visible:mobile?22:tablet?34:37,
    x0:w*(mobile?.275:tablet?.27:.27),
    y0:h*(mobile?.74:tablet?.77:.80),
    // Extend the diagonal line without loosening the printed-paper stack.
-   dx:w*(mobile?.024:tablet?.016:.013),
-   dy:h*(mobile?.020:tablet?.018:.015),
+   dx:w*(mobile?.024:tablet?.018:.0169),
+   dy:h*(mobile?.020:tablet?.020:.0192),
    dz:mobile?9:tablet?11:12,
    angle:mobile?-28:-32,
    skew:mobile?18:22
